@@ -16,6 +16,7 @@ import { ProductCard } from '../components/ProductCard'
 import { ConsultancyCard } from '../components/ConsultancyCard'
 import { Button } from '../components/Button'
 import { Reveal } from '../components/Reveal'
+import { GsapReveal } from '../components/GsapReveal'
 import { PRODUCTS } from '../data/products'
 
 const features = [
@@ -124,7 +125,7 @@ export function HomePage() {
               dark
             />
           </Reveal>
-          <Reveal delay={120}>
+          <GsapReveal delay={0.1} stagger={0.08}>
             <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {features.map((feature) => (
                 <div
@@ -143,7 +144,7 @@ export function HomePage() {
                 </div>
               ))}
             </div>
-          </Reveal>
+          </GsapReveal>
         </div>
       </section>
 

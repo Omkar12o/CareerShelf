@@ -1,30 +1,93 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Loader2, Mail, ArrowRight } from 'lucide-react'
 import { Logo } from '../components/Logo'
 import { Button } from '../components/Button'
-import { Reveal } from '../components/Reveal'
 import { supabase } from '../supabaseClient'
+import { useAuth } from '../useAuth'
 
-type Mode = 'signin' | 'signup'
+type Mode = 'signin' | 'signup' | 'forgot-password'
+
+interface BuyIntent {
+  productId: string
+  tier?: string
+  price: number
+  returnTo: string
+}
+
+// Security: validate that a redirect path is internal and safe
+function isSafeRedirect(path: string | null): boolean {
+  if (!path || !path.startsWith('/')) return false
+  // Reject protocol-relative URLs (//) and absolute URLs
+  if (path.startsWith('//')) return false
+  if (/^https?:\/\//i.test(path)) return false
+  return true
+}
+
+function getStoredIntent(): BuyIntent | null {
+  try {
+    const raw = sessionStorage.getItem('careershelf_buy_intent')
+    if (!raw) return null
+    const intent = JSON.parse(raw) as BuyIntent
+    if (!intent || !intent.productId || !intent.returnTo) return null
+    if (!isSafeRedirect(intent.returnTo)) return null
+    return intent
+  } catch {
+    return null
+  }
+}
+
+function clearStoredIntent() {
+  try {
+    sessionStorage.removeItem('careershelf_buy_intent')
+  } catch {
+    // ignore
+  }
+}
 
 export function AuthPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const redirectTo = (() => {
-    const redirect = searchParams.get('redirect')
-    return redirect && redirect.startsWith('/') ? redirect : '/dashboard'
-  })()
+  const { user, loading: authLoading, signInWithGoogle } = useAuth()
 
   const [mode, setMode] = useState<Mode>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [name, setName] = useState('')
+  const [fullName, setFullName] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [resetEmail, setResetEmail] = useState('')
+  const [resetSubmitting, setResetSubmitting] = useState(false)
+
+  // While auth state is still loading, show neutral state — never redirect
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="size-6 animate-spin" />
+      </div>
+    )
+  }
+
+  // If already logged in, redirect away from /auth
+  if (user) {
+    const redirect = searchParams.get('redirect')
+    const target = isSafeRedirect(redirect) ? redirect : '/dashboard'
+    navigate(target, { replace: true })
+    return null
+  }
+
+  // Resolve where to send the user after successful auth
+  const redirectParam = searchParams.get('redirect')
+  const storedIntent = getStoredIntent()
+  const defaultRedirect = storedIntent?.returnTo ?? '/'
+  const resolvedRedirect = isSafeRedirect(redirectParam) ? redirectParam : defaultRedirect
+
+  // Buy-now banner
+  const buyIntent = storedIntent
+  const showBuyBanner = buyIntent !== null
 
   const toggleMode = (next: Mode) => {
     setMode(next)
@@ -32,110 +95,181 @@ export function AuthPage() {
     setSuccess(null)
   }
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    if (submitting) return
-    setError(null)
-    setSuccess(null)
-    if (!email.includes('@') || password.length < 6) {
-      setError(
-        mode === 'signin'
-          ? 'Enter a valid email and a password of at least 6 characters.'
-          : 'Check your details: a valid email and a password of at least 6 characters are required.',
-      )
-      return
-    }
-    setSubmitting(true)
+  const handleSubmit = useCallback(
+    async (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault()
+      if (submitting) return
+      setError(null)
+      setSuccess(null)
 
-    try {
-      if (mode === 'signin') {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        })
-        if (signInError) {
-          setError(signInError.message)
+      // Validation
+      if (!email.includes('@')) {
+        setError('Please enter a valid email address.')
+        return
+      }
+      if (password.length < 6) {
+        setError('Password must be at least 6 characters.')
+        return
+      }
+      if (mode === 'signup' && !fullName.trim()) {
+        setError('Please enter your full name.')
+        return
+      }
+
+      setSubmitting(true)
+
+      try {
+        if (mode === 'signin') {
+          const { error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          })
+
+          if (signInError) {
+            let msg = signInError.message
+            // Map common Supabase errors to friendly messages
+            if (msg.includes('Failed to fetch')) {
+              msg = 'Cannot connect to the server. Please check your Supabase configuration (VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY).'
+            } else if (msg.includes('Invalid login credentials')) {
+              msg = 'Invalid email or password. Please try again.'
+            } else if (msg.includes('email not confirmed')) {
+              msg = 'Please confirm your email address before signing in. Check your inbox.'
+            } else if (msg.includes('Too many requests')) {
+              msg = 'Too many attempts. Please wait a moment and try again.'
+            }
+            setError(msg)
+            return
+          }
+
+          // Successful sign in — clear intent and redirect
+          clearStoredIntent()
+          navigate(resolvedRedirect, { replace: true })
           return
         }
-        navigate(redirectTo)
-        return
+
+        // Sign up
+        const { error: signUpError, data } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { full_name: fullName.trim() },
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+          },
+        })
+
+        if (signUpError) {
+          let msg = signUpError.message
+          if (msg.includes('Failed to fetch')) {
+            msg = 'Cannot connect to the server. Please check your Supabase configuration (VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY).'
+          } else if (msg.includes('User already registered')) {
+            msg = 'An account with this email already exists. Please sign in instead.'
+          } else if (msg.includes('Too many requests')) {
+            msg = 'Too many sign-up attempts. Please wait a moment and try again.'
+          } else if (msg.includes('Password should be at least')) {
+            msg = 'Password must be at least 6 characters.'
+          }
+          setError(msg)
+          return
+        }
+
+        if (data.session) {
+          // Auto-confirmed (email confirmations off)
+          clearStoredIntent()
+          navigate(resolvedRedirect, { replace: true })
+          return
+        }
+
+        // Email confirmation required
+        setMode('signin')
+        setEmail('')
+        setPassword('')
+        setFullName('')
+        setSuccess(
+          'Account created! Please check your email to confirm your account, then sign in.',
+        )
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Something went wrong.'
+        setError(
+          msg.includes('Failed to fetch')
+            ? 'Cannot connect to the server. Please check your Supabase configuration (VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY).'
+            : msg,
+        )
+      } finally {
+        setSubmitting(false)
       }
+    },
+    [email, password, fullName, mode, submitting, resolvedRedirect, navigate],
+  )
 
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { full_name: name.trim() },
-        },
-      })
-
-      if (signUpError) {
-        setError(signUpError.message)
-        return
-      }
-
-      if (data.session) {
-        navigate(redirectTo)
-        return
-      }
-
-      setMode('signin')
-      setEmail('')
-      setPassword('')
-      setName('')
-      setSuccess(
-        'Account created! Check your email to confirm your sign-up, then sign in.',
-      )
+  const handleGoogleSignIn = async () => {
+    setError(null)
+    try {
+      await signInWithGoogle()
+      // OAuth redirects to /auth/callback, which handles the redirect
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : 'Something went wrong. Please try again.',
+        err instanceof Error ? err.message : 'Google sign-in failed. Please try again.',
       )
-    } finally {
-      setSubmitting(false)
     }
   }
 
-  const inputClass = 'input'
+  const handleForgotPassword = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!resetEmail.includes('@')) {
+      setError('Please enter a valid email address.')
+      return
+    }
+    setResetSubmitting(true)
+    setError(null)
+    try {
+      await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      })
+      setSuccess(
+        'If an account exists for this email, you will receive a password reset link.',
+      )
+      setResetEmail('')
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Could not send reset email. Please try again.',
+      )
+    } finally {
+      setResetSubmitting(false)
+    }
+  }
+
+  const inputClass =
+    'w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 disabled:opacity-50 disabled:pointer-events-none'
 
   return (
     <div className="grid min-h-[calc(100vh-4rem)] lg:grid-cols-2">
       {/* Brand panel */}
-      <div className="relative hidden flex-col justify-between overflow-hidden bg-gray-950 p-12 lg:flex">
+      <div className="relative hidden flex-col justify-between overflow-hidden bg-[#141414] p-12 lg:flex">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 bg-grid-dark [mask-image:radial-gradient(ellipse_80%_80%_at_50%_0%,black,transparent)]"
         />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-24 top-16 size-80 rounded-full bg-brand-600/30 blur-3xl"
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -left-24 bottom-16 size-72 rounded-full bg-accent-500/10 blur-3xl"
-        />
-        <div className="relative">
-          <Logo />
+        <div className="relative z-10">
+          <Logo className="" inverted={true} />
         </div>
-        <div className="relative">
-          <blockquote className="max-w-md text-2xl font-bold leading-snug tracking-tight text-white">
+        <div className="relative z-10 mt-12">
+          <blockquote className="max-w-md text-xl font-bold leading-snug tracking-tight text-[#F6F3ED]">
             &ldquo;I sent 40 emails from the HR list and got nine responses.
             Nothing else I tried came close.&rdquo;
           </blockquote>
-          <p className="mt-4 text-sm font-semibold text-brand-400">
+          <p className="mt-4 text-sm font-semibold text-[#A8A29E]">
             Daniel Kim · Senior Software Engineer
           </p>
         </div>
-        <div className="relative flex gap-12 text-sm">
+        <div className="relative z-10 mt-10 flex gap-8 text-sm">
           <div>
-            <p className="text-3xl font-extrabold tracking-tight text-white">
+            <p className="text-3xl font-extrabold tracking-tight text-[#F6F3ED]">
               8,400+
             </p>
             <p className="mt-1 font-medium text-gray-400">products sold</p>
           </div>
           <div>
-            <p className="text-3xl font-extrabold tracking-tight text-white">
+            <p className="text-3xl font-extrabold tracking-tight text-[#F6F3ED]">
               4.8/5
             </p>
             <p className="mt-1 font-medium text-gray-400">average rating</p>
@@ -144,16 +278,28 @@ export function AuthPage() {
       </div>
 
       {/* Form panel */}
-      <div className="flex items-center justify-center px-4 py-12 sm:px-6">
-        <Reveal className="w-full max-w-sm">
+      <div className="flex items-center justify-center px-4 py-12 sm:px-6 bg-[#F6F3ED]">
+        <div className="w-full max-w-md">
           <div className="mb-8 flex items-center justify-between lg:hidden">
-            <Logo />
+            <Logo inverted={true} />
           </div>
 
-          <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">
+          {/* Buy-now banner */}
+          {showBuyBanner && buyIntent && (
+            <div
+              className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
+              role="status"
+            >
+              Sign in to continue your purchase of{' '}
+              <span className="font-semibold">{buyIntent.productId}</span>
+              &mdash; ₹{buyIntent.price.toLocaleString()}
+            </div>
+          )}
+
+          <h1 className="text-3xl font-extrabold tracking-tight text-[#141414] mb-1">
             {mode === 'signin' ? 'Welcome back' : 'Create your account'}
           </h1>
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm text-[#5C5750]">
             {mode === 'signin'
               ? 'Sign in to view your purchases and download updates.'
               : 'Buy once, and your downloads live here forever.'}
@@ -162,7 +308,7 @@ export function AuthPage() {
           <div
             role="tablist"
             aria-label="Sign in or sign up"
-            className="mt-6 grid grid-cols-2 gap-1 rounded-xl bg-gray-100 p-1"
+            className="mt-6 grid grid-cols-2 gap-1 rounded-lg border border-gray-200 bg-white p-1"
           >
             {(['signin', 'signup'] as const).map((m) => (
               <button
@@ -173,8 +319,8 @@ export function AuthPage() {
                 onClick={() => toggleMode(m)}
                 className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-150 ${
                   mode === m
-                    ? 'bg-gray-900 text-white shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'bg-[#141414] text-[#F6F3ED] shadow-sm'
+                    : 'text-[#5C5750] hover:text-[#141414]'
                 }`}
               >
                 {m === 'signin' ? 'Sign in' : 'Sign up'}
@@ -195,8 +341,8 @@ export function AuthPage() {
                   id="name"
                   type="text"
                   autoComplete="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
                   placeholder="Jane Cooper"
                   className={inputClass}
                 />
@@ -230,9 +376,15 @@ export function AuthPage() {
                   Password
                 </label>
                 {mode === 'signin' ? (
-                  <span className="text-xs font-medium text-brand-600 hover:text-brand-700">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigate('/reset-password')
+                    }}
+                    className="text-xs font-medium text-brand-600 hover:text-brand-700"
+                  >
                     Forgot password?
-                  </span>
+                  </button>
                 ) : null}
               </div>
               <div className="relative">
@@ -261,13 +413,13 @@ export function AuthPage() {
             </div>
 
             {error ? (
-              <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+              <p className="rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
                 {error}
               </p>
             ) : null}
 
             {success ? (
-              <p className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+              <p className="rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
                 {success}
               </p>
             ) : null}
@@ -288,6 +440,29 @@ export function AuthPage() {
               )}
             </Button>
           </form>
+
+          {/* Google sign-in divider */}
+          <div className="mt-6 relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-gray-200"></span>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase font-bold text-gray-400">
+              <span className="px-2 bg-[#F6F3ED]">Continue with</span>
+            </div>
+          </div>
+
+          <button
+            onClick={handleGoogleSignIn}
+            disabled={submitting}
+            className="mt-4 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-bold text-gray-700 flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+          >
+            <span className="flex items-center gap-1">
+              <span className="w-5 h-5 rounded border border-gray-300 flex items-center justify-center text-[10px] font-bold">
+                G
+              </span>
+              Continue with Google
+            </span>
+          </button>
 
           <p className="mt-6 text-center text-sm text-gray-500">
             {mode === 'signin' ? (
@@ -319,7 +494,7 @@ export function AuthPage() {
             Secured by Supabase Auth — your account keeps your purchases and
             downloads in one place.
           </p>
-        </Reveal>
+        </div>
       </div>
     </div>
   )

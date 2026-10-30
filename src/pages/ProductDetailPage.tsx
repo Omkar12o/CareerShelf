@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useCallback, useEffect, useState } from 'react'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft,
   Check,
@@ -92,15 +92,49 @@ function DocumentPreview({ product }: { product: Product }) {
 
 export function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>()
+  const navigate = useNavigate()
   const [product, setProduct] = useState<Product>()
   const [related, setRelated] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const { status, message, startCheckout } = useRazorpayCheckout()
   const checkoutLoading = status === 'loading'
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const [owned, setOwned] = useState(false)
   const [ownershipLoading, setOwnershipLoading] = useState(false)
+
+  const [buyIntent, setBuyIntent] = useState<{
+    productId: string
+    tier?: string
+    price: number
+  } | null>(null)
+
+  const handleBuyNow = useCallback(
+    async (p: Product) => {
+      // While auth is loading, do nothing (button shows spinner via checkoutLoading or authLoading)
+      if (authLoading) return
+
+      // Save intent in case we need to redirect to auth
+      const intent = {
+        productId: p.id,
+        tier: undefined,
+        price: p.price,
+        returnTo: `/products/${p.slug}`,
+      }
+      sessionStorage.setItem('careershelf_buy_intent', JSON.stringify(intent))
+      setBuyIntent(intent)
+
+      if (user) {
+        // Logged in: go straight to checkout/payment
+        setBuyIntent(null)
+        await startCheckout(p)
+      } else {
+        // Not logged in: save intent and redirect to auth
+        navigate(`/auth?redirect=/products/${p.slug}&intent=buy`)
+      }
+    },
+    [user, authLoading, navigate, startCheckout],
+  )
 
   useEffect(() => {
     let cancelled = false
@@ -138,16 +172,14 @@ export function ProductDetailPage() {
         .from('products')
         .select('*')
         .returns<ProductRow[]>()
+        .order('created_at', { ascending: false })
 
       if (cancelled) return
 
       setRelated(
         (allData ?? [])
           .map(productFromRow)
-          .filter(
-            (p) =>
-              p.category === mapped.category && p.id !== mapped.id,
-          )
+          .filter((p) => p.category === mapped.category && p.id !== mapped.id)
           .slice(0, 3),
       )
     }
@@ -194,11 +226,7 @@ export function ProductDetailPage() {
   if (loading) {
     return (
       <div className="mx-auto flex min-h-96 items-center justify-center px-4">
-        <span
-          role="status"
-          aria-label="Loading product"
-          className="spinner"
-        />
+        <span role="status" aria-label="Loading product" className="spinner" />
       </div>
     )
   }
@@ -266,9 +294,7 @@ export function ProductDetailPage() {
               <span className="font-semibold text-white">
                 {product.rating.toFixed(1)}
               </span>
-              <span className="text-gray-400">
-                ({product.reviewCount} reviews)
-              </span>
+              <span className="text-gray-400">({product.reviewCount} reviews)</span>
               {product.duration ? (
                 <>
                   <span className="text-gray-600">·</span>
@@ -339,10 +365,10 @@ export function ProductDetailPage() {
                 <Button
                   size="lg"
                   className="flex-1 sm:flex-none"
-                  disabled={checkoutLoading}
-                  onClick={() => void startCheckout(product)}
+                  disabled={checkoutLoading || authLoading}
+                  onClick={() => void handleBuyNow(product)}
                 >
-                  {checkoutLoading ? (
+                  {checkoutLoading || authLoading ? (
                     <Loader2 className="size-4 animate-spin" />
                   ) : isBookable(product) ? (
                     <CalendarClock className="size-4" />
@@ -353,8 +379,8 @@ export function ProductDetailPage() {
                   size="lg"
                   variant="outline"
                   className="border-white/20 bg-transparent text-white hover:border-white/40 hover:bg-white/10"
-                  disabled={checkoutLoading}
-                  onClick={() => void startCheckout(product)}
+                  disabled={checkoutLoading || authLoading}
+                  onClick={() => void handleBuyNow(product)}
                 >
                   {isBookable(product) ? (
                     <Clock className="size-4" />
@@ -412,77 +438,77 @@ export function ProductDetailPage() {
           <div className="grid gap-12 lg:grid-cols-[1.6fr_1fr]">
             <div>
               <h2 className="text-xl font-bold text-gray-900">What&apos;s inside</h2>
-            <div className="mt-4 space-y-4 text-base leading-relaxed text-gray-600">
-              {product.description.map((paragraph) => (
-                <p key={paragraph.slice(0, 40)}>{paragraph}</p>
-              ))}
+              <div className="mt-4 space-y-4 text-base leading-relaxed text-gray-600">
+                {product.description.map((paragraph) => (
+                  <p key={paragraph.slice(0, 40)}>{paragraph}</p>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <aside className="h-fit rounded-xl border border-gray-200 bg-white p-6 shadow-lg shadow-gray-900/5 lg:sticky lg:top-24">
-            <div className="flex items-center gap-3">
-              <ProductIconBadge category={product.category} />
-              <div>
-                <p className="font-semibold text-gray-900">{product.title}</p>
-                <p className="text-sm text-gray-500">{product.downloadType}</p>
+            <aside className="h-fit rounded-xl border border-gray-200 bg-white p-6 shadow-lg shadow-gray-900/5 lg:sticky lg:top-24">
+              <div className="flex items-center gap-3">
+                <ProductIconBadge category={product.category} />
+                <div>
+                  <p className="font-semibold text-gray-900">{product.title}</p>
+                  <p className="text-sm text-gray-500">{product.downloadType}</p>
+                </div>
               </div>
-            </div>
-            <ul className="mt-6 space-y-3">
-              {product.includes.map((item) => (
-                <li key={item} className="flex items-start gap-2.5 text-sm text-gray-600">
-                  <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-accent-100 text-accent-600">
-                    <Check className="size-3.5" strokeWidth={3} />
+              <ul className="mt-6 space-y-3">
+                {product.includes.map((item) => (
+                  <li key={item} className="flex items-start gap-2.5 text-sm text-gray-600">
+                    <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-accent-100 text-accent-600">
+                      <Check className="size-3.5" strokeWidth={3} />
+                    </span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-6 border-t border-gray-100 pt-6">
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-bold text-gray-900">
+                    {formatPrice(product.price)}
                   </span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-            <div className="mt-6 border-t border-gray-100 pt-6">
-              <div className="flex items-center justify-between">
-                <span className="text-lg font-bold text-gray-900">
-                  {formatPrice(product.price)}
-                </span>
-                {product.originalPrice ? (
-                  <span className="text-sm text-gray-400 line-through">
-                    {formatPrice(product.originalPrice)}
-                  </span>
-                ) : null}
-              </div>
-              {owned && pdfUrl ? (
-                <Button className="mt-4 w-full" size="lg" href={pdfUrl}>
-                  <Download className="size-4" />
-                  Download now
-                </Button>
-              ) : owned ? (
-                <Button className="mt-4 w-full" size="lg" to="/dashboard">
-                  Go to My purchases
-                </Button>
-              ) : (
-                <Button
-                  className="mt-4 w-full"
-                  size="lg"
-                  disabled={checkoutLoading}
-                  onClick={() => void startCheckout(product)}
-                >
-                  {checkoutLoading ? (
-                    <Loader2 className="size-4 animate-spin" />
+                  {product.originalPrice ? (
+                    <span className="text-sm text-gray-400 line-through">
+                      {formatPrice(product.originalPrice)}
+                    </span>
                   ) : null}
-                  {ctaLabel(product)} — {formatPrice(product.price)}
-                </Button>
-              )}
-              <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-gray-400">
-                <ProductIcon category={product.category} size={14} />
-                {owned
-                  ? isBookable(product)
-                    ? 'Booked · Manage in My purchases'
-                    : 'Owned · Download anytime'
-                  : isBookable(product)
-                    ? 'Secure booking · Confirmation within 24h'
-                    : 'Secure checkout · Instant delivery'}
-              </p>
-            </div>
-          </aside>
-        </div>
+                </div>
+                {owned && pdfUrl ? (
+                  <Button className="mt-4 w-full" size="lg" href={pdfUrl}>
+                    <Download className="size-4" />
+                    Download now
+                  </Button>
+                ) : owned ? (
+                  <Button className="mt-4 w-full" size="lg" to="/dashboard">
+                    Go to My purchases
+                  </Button>
+                ) : (
+                  <Button
+                    className="mt-4 w-full"
+                    size="lg"
+                    disabled={checkoutLoading || authLoading}
+                    onClick={() => void handleBuyNow(product)}
+                  >
+                    {checkoutLoading || authLoading ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : null}
+                    {ctaLabel(product)} — {formatPrice(product.price)}
+                  </Button>
+                )}
+                <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-gray-400">
+                  <ProductIcon category={product.category} size={14} />
+                  {owned
+                    ? isBookable(product)
+                      ? 'Booked · Manage in My purchases'
+                      : 'Owned · Download anytime'
+                    : isBookable(product)
+                      ? 'Secure booking · Confirmation within 24h'
+                      : 'Secure checkout · Instant delivery'}
+                </p>
+              </div>
+            </aside>
+          </div>
         </Reveal>
       </section>
 

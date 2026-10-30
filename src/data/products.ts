@@ -6,6 +6,7 @@ export type ProductCategory =
   | 'resume'
   | 'cheatsheet'
   | 'referral'
+  | 'service'
 
 export type Product = {
   id: string
@@ -27,6 +28,16 @@ export type Product = {
   duration?: string
   slotsLeft?: number
   'pdf-url'?: string
+  // Service-specific fields
+  serviceType?: string
+  features?: string[]
+  techStack?: string[]
+  deliverables?: string[]
+  whatsIncluded?: string[]
+  deliveryTime?: string
+  documentation?: string[]
+  faq?: { q: string; a: string }[]
+  pricingNote?: string
 }
 
 export type ProductRow = {
@@ -429,6 +440,131 @@ export const PRODUCTS: Product[] = [
     downloadType: 'PDF (5 pages)',
     updatedAt: 'Jul 2026',
   },
+  {
+    id: 'svc-1',
+    slug: 'normal-project',
+    title: 'Normal Project',
+    tagline: 'Starting from ₹3,000 + documentation',
+    shortDescription: 'A focused single-purpose project with full documentation and setup support.',
+    description: [
+      'A focused project tailored to your requirements, delivered with complete documentation.',
+      'Includes source code, setup guide, and post-delivery support.',
+    ],
+    price: 3000,
+    category: 'service',
+    badge: 'New',
+    featured: true,
+    includes: ['Source code', 'Documentation', 'Setup support'],
+    rating: 5,
+    reviewCount: 0,
+    downloadType: 'Project delivery',
+    updatedAt: 'Oct 2026',
+    serviceType: 'Normal Project',
+    features: ['Custom scope', 'Clean codebase', 'Documentation included'],
+    techStack: ['React', 'Node.js', 'Tailwind'],
+    deliverables: ['Source code', 'SRS', 'Setup guide', 'User manual'],
+    whatsIncluded: ['Source code', 'Documentation', 'Setup support'],
+    deliveryTime: '1-2 weeks',
+    documentation: ['SRS', 'ER diagram', 'API docs', 'Setup guide', 'User manual', 'PPT'],
+    pricingNote: 'Starting from ₹3,000',
+  },
+  {
+    id: 'svc-2',
+    slug: 'frontend-backend-project',
+    title: 'Frontend + Backend Project',
+    tagline: 'Starting from ₹8,000 + documentation',
+    shortDescription: 'Full-stack project with frontend and backend, fully documented.',
+    description: ['Complete full-stack application with frontend and backend, delivered with documentation.'],
+    price: 8000,
+    category: 'service',
+    badge: 'New',
+    featured: true,
+    includes: ['Source code', 'Documentation', 'Setup support'],
+    rating: 5,
+    reviewCount: 0,
+    downloadType: 'Project delivery',
+    updatedAt: 'Oct 2026',
+    serviceType: 'Frontend + Backend',
+    features: ['Full-stack', 'API integration', 'Documentation included'],
+    techStack: ['React', 'Node.js', 'Express', 'PostgreSQL'],
+    deliverables: ['Source code', 'SRS', 'API docs', 'Setup guide'],
+    whatsIncluded: ['Source code', 'Documentation', 'Setup support'],
+    deliveryTime: '2-4 weeks',
+    documentation: ['SRS', 'ER diagram', 'API docs', 'Setup guide', 'User manual', 'PPT'],
+    pricingNote: 'Starting from ₹8,000',
+  },
+  {
+    id: 'svc-3',
+    slug: 'big-custom-project',
+    title: 'Big / Custom Project',
+    tagline: 'Contact for quote',
+    shortDescription: 'Large or custom project scoped to your needs. Price set after consultation.',
+    description: ['Custom large-scale project. Contact for a quote tailored to your requirements.'],
+    price: 0,
+    category: 'service',
+    badge: 'Custom',
+    includes: ['Source code', 'Documentation', 'Setup support'],
+    rating: 5,
+    reviewCount: 0,
+    downloadType: 'Project delivery',
+    updatedAt: 'Oct 2026',
+    serviceType: 'Big / Custom',
+    features: ['Custom scope', 'Dedicated support'],
+    techStack: ['Custom'],
+    deliverables: ['Source code', 'Documentation'],
+    whatsIncluded: ['Source code', 'Documentation', 'Setup support'],
+    deliveryTime: 'As agreed',
+    documentation: ['SRS', 'ER diagram', 'API docs', 'Setup guide', 'User manual', 'PPT'],
+    pricingNote: 'Contact for quote',
+  },
+  {
+    id: 'svc-4',
+    slug: 'ui-ux-design',
+    title: 'UI/UX Design for Application',
+    tagline: '₹2,000',
+    shortDescription: 'Professional UI/UX design for your application.',
+    description: ['Complete UI/UX design deliverables for your app.'],
+    price: 2000,
+    category: 'service',
+    badge: 'New',
+    includes: ['Design files', 'Documentation'],
+    rating: 5,
+    reviewCount: 0,
+    downloadType: 'Design delivery',
+    updatedAt: 'Oct 2026',
+    serviceType: 'UI/UX Design',
+    features: ['Wireframes', 'High-fidelity designs', 'Design system'],
+    techStack: ['Figma'],
+    deliverables: ['Design files', 'Style guide'],
+    whatsIncluded: ['Design files', 'Documentation'],
+    deliveryTime: '1 week',
+    documentation: ['Design spec', 'Style guide'],
+    pricingNote: '₹2,000',
+  },
+  {
+    id: 'svc-5',
+    slug: 'flutter-mobile-app',
+    title: 'Flutter Mobile App',
+    tagline: 'Starting from ₹6,000 + documentation',
+    shortDescription: 'Cross-platform mobile app built with Flutter, with documentation.',
+    description: ['Flutter mobile application delivered with full documentation.'],
+    price: 6000,
+    category: 'service',
+    badge: 'New',
+    includes: ['Source code', 'Documentation', 'Setup support'],
+    rating: 5,
+    reviewCount: 0,
+    downloadType: 'App delivery',
+    updatedAt: 'Oct 2026',
+    serviceType: 'Flutter Mobile App',
+    features: ['Cross-platform', 'Documentation included'],
+    techStack: ['Flutter', 'Dart'],
+    deliverables: ['Source code', 'APK', 'Documentation'],
+    whatsIncluded: ['Source code', 'Documentation', 'Setup support'],
+    deliveryTime: '2-3 weeks',
+    documentation: ['SRS', 'Setup guide', 'User manual'],
+    pricingNote: 'Starting from ₹6,000',
+  },
 ]
 
 export function getProductBySlug(slug: string): Product | undefined {
@@ -447,6 +583,7 @@ export const CATEGORY_LABELS: Record<ProductCategory, string> = {
   resume: 'Resume Guides',
   cheatsheet: 'Cheat Sheets',
   referral: 'Reference / Referrals',
+  service: 'Projects & Services',
 }
 
 export const isBookable = (product: Product): boolean =>

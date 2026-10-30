@@ -18,6 +18,7 @@ const iconMap: Record<ProductCategory, LucideIcon> = {
   resume: FileText,
   cheatsheet: ClipboardList,
   referral: Link2,
+  service: ClipboardList,
 }
 
 const colorMap: Record<
@@ -31,6 +32,7 @@ const colorMap: Record<
   resume: { bg: 'bg-sky-100', text: 'text-sky-700' },
   cheatsheet: { bg: 'bg-teal-100', text: 'text-teal-700' },
   referral: { bg: 'bg-rose-100', text: 'text-rose-700' },
+  service: { bg: 'bg-brand-100', text: 'text-brand-700' },
 }
 
 type ProductIconProps = {

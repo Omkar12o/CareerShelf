@@ -1,4 +1,7 @@
 import { ArrowRight, Star } from 'lucide-react'
+import { useEffect, useRef } from 'react'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Button } from './Button'
 import { ProductIconBadge } from './ProductIcon'
 import { formatPrice, PRODUCTS } from '../data/products'
@@ -10,11 +13,34 @@ const heroStats = [
   { value: '30 days', label: 'Money-back guarantee' },
 ]
 
+gsap.registerPlugin(ScrollTrigger)
+
 export function Hero() {
+  const ref = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduced) return
+    const ctx = gsap.context(() => {
+      gsap.to('.hero-blob', {
+        yPercent: 30,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: true,
+        },
+      })
+    }, el)
+    return () => ctx.revert()
+  }, [])
+
   const featured = PRODUCTS.filter((p) => p.featured).slice(0, 3)
 
   return (
-    <section className="relative overflow-hidden bg-gray-50">
+    <section ref={ref} className="relative overflow-hidden bg-gray-50">
       {/* Background: grid + gradient mesh */}
       <div
         aria-hidden="true"
@@ -22,11 +48,11 @@ export function Hero() {
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -left-40 -top-20 size-[38rem] rounded-full bg-brand-300/40 blur-3xl"
+        className="pointer-events-none absolute -left-40 -top-20 size-[38rem] rounded-full bg-brand-300/40 blur-3xl hero-blob"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-40 top-32 size-[32rem] rounded-full bg-accent-300/30 blur-3xl"
+        className="pointer-events-none absolute -right-40 top-32 size-[32rem] rounded-full bg-accent-300/30 blur-3xl hero-blob"
       />
 
       <div className="relative mx-auto grid max-w-7xl items-center gap-14 px-4 pb-20 pt-16 sm:px-6 sm:pt-24 lg:grid-cols-2 lg:gap-16 lg:px-8 lg:pb-28 lg:pt-32">

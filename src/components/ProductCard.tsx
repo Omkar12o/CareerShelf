@@ -33,7 +33,7 @@ export function ProductCard({ product }: ProductCardProps) {
         : 'text-amber-600'
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-brand-300 hover:shadow-lg hover:shadow-gray-900/8">
+    <article className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-brand-300 hover:shadow-lg hover:shadow-gray-900/8 [transform-style:preserve-3d] hover:[transform:perspective(1000px)_rotateX(2deg)_rotateY(-2deg)_translateY(-4px)]">
       <div
         aria-hidden="true"
         className="h-1 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500"

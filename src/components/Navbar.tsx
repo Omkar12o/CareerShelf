@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
-import { Menu, X } from 'lucide-react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { Menu, X, ChevronDown } from 'lucide-react'
+import { NavLink, useLocation, Link } from 'react-router-dom'
 import { Logo } from './Logo'
 import { Button } from './Button'
 import { useAuth } from '../useAuth'
 
 const navLinks = [
   { to: '/products', label: 'Products' },
+  { to: '/services', label: 'Services' },
   { to: '/about', label: 'About' },
   { to: '/contact', label: 'Contact' },
 ]
@@ -14,8 +15,9 @@ const navLinks = [
 export function Navbar() {
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
   const location = useLocation()
-  const { user, signOut } = useAuth()
+  const { user, signOut, session } = useAuth()
 
   useEffect(() => {
     setOpen(false)
@@ -28,6 +30,11 @@ export function Navbar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  const displayName =
+    String(user?.user_metadata?.full_name ?? '').trim() ||
+    user?.email?.split('@')[0] ||
+    'My Account'
+
   return (
     <header
       className={`sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-md transition-shadow duration-150 ${
@@ -35,7 +42,7 @@ export function Navbar() {
       }`}
     >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Logo />
+        <Logo inverted={scrolled} />
 
         <div className="hidden items-center gap-1 md:flex">
           {navLinks.map((link) => (
@@ -47,8 +54,7 @@ export function Navbar() {
                   isActive
                     ? 'bg-gray-900 text-white shadow-sm'
                     : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
-                }`
-              }
+                }`}
             >
               {link.label}
             </NavLink>
@@ -57,22 +63,48 @@ export function Navbar() {
 
         <div className="hidden items-center gap-3 md:flex">
           {user ? (
+            <div className="relative">
+              <button
+                onClick={() => setUserMenuOpen((v) => !v)}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-600"
+                aria-label="User menu"
+                aria-expanded={userMenuOpen}
+                aria-haspopup="true"
+              >
+                <span className="truncate max-w-[140px]">{displayName}</span>
+                <ChevronDown className="size-3.5" />
+              </button>
+              {userMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 rounded-lg border border-gray-200 bg-white p-1 shadow-lg shadow-gray-900/10 z-50">
+                  <NavLink
+                    to="/dashboard"
+                    onClick={() => setUserMenuOpen(false)}
+                    className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    My purchases
+                  </NavLink>
+                  <button
+                    onClick={() => {
+                      setUserMenuOpen(false)
+                      void signOut()
+                    }}
+                    className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    Sign out
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
             <>
-              <span className="max-w-40 truncate text-sm font-semibold text-gray-700">
-                {user.email ?? 'My Account'}
-              </span>
-              <Button variant="outline" size="sm" onClick={() => void signOut()}>
-                Sign out
+              <Button to="/auth" variant="ghost" size="sm">
+                Sign in
+              </Button>
+              <Button to="/dashboard" size="sm">
+                My purchases
               </Button>
             </>
-          ) : (
-            <Button to="/auth" variant="ghost" size="sm">
-              Sign in
-            </Button>
           )}
-          <Button to="/dashboard" size="sm">
-            My purchases
-          </Button>
         </div>
 
         <button
@@ -99,48 +131,53 @@ export function Navbar() {
                     isActive
                       ? 'bg-gray-900 text-white shadow-sm'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`
-                }
-              >
-                {link.label}
-              </NavLink>
-            ))}
+                  }`}
+                >
+                  {link.label}
+                </NavLink>
+              ))}
           </div>
           <div className="mt-3 flex flex-col gap-2 border-t border-gray-100 pt-3">
             {user ? (
               <>
-                <p className="px-1 text-sm font-medium text-gray-700">
-                  {user.email ?? 'My Account'}
-                </p>
-                <Button
-                  variant="outline"
-                  size="md"
+                <p className="px-1 text-sm font-medium text-gray-700">{displayName}</p>
+                <NavLink
+                  to="/dashboard"
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg px-3 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                >
+                  My purchases
+                </NavLink>
+                <button
                   onClick={() => {
                     setOpen(false)
                     void signOut()
                   }}
+                  className="rounded-lg px-3 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-gray-900"
                 >
                   Sign out
-                </Button>
+                </button>
               </>
             ) : (
-              <Button
-                to="/auth"
-                variant="outline"
-                size="md"
-                onClick={() => setOpen(false)}
-              >
-                Sign in
-              </Button>
+              <>
+                <Button
+                  to="/auth"
+                  variant="outline"
+                  size="md"
+                  onClick={() => setOpen(false)}
+                >
+                  Sign in
+                </Button>
+                <Button
+                  to="/dashboard"
+                  variant="primary"
+                  size="md"
+                  onClick={() => setOpen(false)}
+                >
+                  My purchases
+                </Button>
+              </>
             )}
-            <Button
-              to="/dashboard"
-              variant="primary"
-              size="md"
-              onClick={() => setOpen(false)}
-            >
-              My purchases
-            </Button>
           </div>
         </div>
       ) : null}

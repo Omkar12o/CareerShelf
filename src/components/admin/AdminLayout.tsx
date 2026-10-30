@@ -7,6 +7,7 @@ import {
   Package,
   ReceiptText,
   ShieldCheck,
+  Wrench,
 } from 'lucide-react'
 import { useAuth } from '../../useAuth'
 import { isAdminEmail } from '../../admin'
@@ -25,6 +26,7 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { to: '/admin', label: 'Overview', icon: LayoutDashboard, end: true },
   { to: '/admin/products', label: 'Products', icon: Package, end: false },
+  { to: '/admin/services', label: 'Services', icon: Wrench, end: false },
   { to: '/admin/orders', label: 'Orders', icon: ReceiptText, end: false },
 ]
 

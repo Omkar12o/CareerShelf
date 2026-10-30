@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Frontend + Backend Project - CareerShelf</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script data-purpose="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              bg: '#F7F4EC',
+              card: '#FFFFFF',
+              surface: '#FAF8F5',
+              border: '#E7E2D6',
+              borderDark: '#D4CDBF',
+              accentPill: '#EFECE3',
+              dark: '#141413',
+              charcoal: '#242320',
+              muted: '#727068',
+              emerald: '#16A34A',
+              emeraldBg: '#ECFDF5',
+              badgeBg: '#EDEAE0'
+            }
+          },
+          fontFamily: {
+            serif: ['"Instrument Serif"', 'Georgia', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="typography-custom">
+    body {
+      background-color: #F7F4EC;
+      color: #141413;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .font-editorial {
+      font-family: 'Instrument Serif', Georgia, serif;
+    }
+    /* Tab switching via CSS */
+    #tab-specs:checked ~ div #panel-specs { display: block; }
+    #tab-specs:checked ~ div #panel-docs { display: none; }
+    #tab-docs:checked ~ div #panel-specs { display: none; }
+    #tab-docs:checked ~ div #panel-docs { display: block; }
+
+    #tab-specs:checked ~ div #btn-specs {
+      background-color: #141413;
+      color: #FFFFFF;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    }
+    #tab-docs:checked ~ div #btn-docs {
+      background-color: #141413;
+      color: #FFFFFF;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    }
+    #tab-specs:checked ~ div #btn-docs {
+      background-color: transparent;
+      color: #727068;
+    }
+    #tab-docs:checked ~ div #btn-specs {
+      background-color: transparent;
+      color: #727068;
+    }
+
+    /* QR scanner video styling */
+    video {
+      background: #000;
+      border-radius: 8px;
+      transform: scaleX(-1);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#F7F4EC]">
+<!-- BEGIN: AnnouncementBar -->
+<div class="bg-[#141413] text-[#FAF8F5] text-[11px] font-semibold tracking-wider text-center py-2 px-4 uppercase" data-purpose="top-bar">
+    Instant digital delivery • Secure payments
+  </div>
+<!-- END: AnnouncementBar -->
+<!-- BEGIN: NavigationHeader -->
+<header class="border-b border-[#E7E2D6] bg-[#F7F4EC]/95 backdrop-blur-md sticky top-0 z-40" data-purpose="main-navigation">
+<div class="max-w-[1280px] mx-auto px-6 h-16 flex items-center justify-between">
+<!-- Left side: Brand and Links -->
+<div class="flex items-center space-x-10">
+<!-- Logo -->
+<a class="flex items-center space-x-2.5 text-[#141413] group" href="#">
+<div class="w-8 h-8 rounded-lg bg-[#141413] text-white flex items-center justify-center font-bold text-base shadow-sm">
+<svg class="w-4 h-4 stroke-[2.2]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="font-bold text-[19px] tracking-tight text-[#141413]">CareerShelf</span>
+</a>
+<!-- Nav Navigation Menu -->
+<nav class="hidden md:flex items-center space-x-1">
+<a class="px-3.5 py-1.5 text-[13px] font-medium text-[#727068] hover:text-[#141413] transition-colors" href="#">Products</a>
+<a class="px-4 py-1.5 text-[13px] font-semibold text-white bg-[#141413] rounded-full transition-colors shadow-sm" href="#">Services</a>
+<a class="px-3.5 py-1.5 text-[13px] font-medium text-[#727068] hover:text-[#141413] transition-colors" href="#">About</a>
+<a class="px-3.5 py-1.5 text-[13px] font-medium text-[#727068] hover:text-[#141413] transition-colors" href="#">Contact</a>
+</nav>
+</div>
+<!-- Right side: User actions -->
+<div class="flex items-center space-x-4">
+<a class="text-[13px] font-medium text-[#242320] hover:text-black transition-colors" href="#">Sign in</a>
+<button class="bg-[#141413] text-white text-[13px] font-medium px-4 py-2 rounded-lg hover:bg-black transition shadow-sm inline-flex items-center gap-2">
+<span>My purchases</span>
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+</button>
+</div>
+</div>
+</header>
+<!-- END: NavigationHeader -->
+<!-- BEGIN: MainContent -->
+<main class="flex-grow max-w-[1280px] w-full mx-auto px-4 sm:px-6 py-7 md:py-9">
+<!-- BEGIN: TitleAndPriceBanner -->
+<section class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-6 border-b border-[#E7E2D6] mb-8" data-purpose="hero-header">
+<!-- Title & Tags -->
+<div class="space-y-3">
+<div class="inline-flex items-center space-x-2 text-[11px] uppercase tracking-wider font-semibold text-[#727068] bg-[#EDEAE0] px-3 py-1 rounded-md border border-[#E7E2D6]">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+<span class="text-[#141413]">Frontend + Backend</span>
+<span class="text-[#727068]/50">|</span>
+<span>Delivery: 2-4 weeks</span>
+<span class="text-[#727068]/50">|</span>
+<span class="text-[#141413]">Production-ready Bundle</span>
+</div>
+<h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-editorial tracking-tight text-[#141413] leading-none">
+          Frontend + Backend Project
+        </h1>
+<p class="text-xs sm:text-sm text-[#727068] flex items-center gap-2">
+<span>Starting from ₹8,000 + documentation</span>
+<span class="inline-block w-1 h-1 rounded-full bg-[#D4CDBF]"></span>
+<span class="text-emerald-700 font-medium bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/60">Instant verification active</span>
+</p>
+</div>
+<!-- Quick Price Card -->
+<div class="bg-white border border-[#E7E2D6] rounded-xl px-5 py-3.5 shadow-sm min-w-[230px] self-start lg:self-auto flex items-center justify-between lg:block lg:text-right" data-purpose="base-price-badge">
+<div class="text-[10px] uppercase font-semibold tracking-wider text-[#727068] mb-1 flex items-center justify-start lg:justify-end space-x-1.5">
+<span>Fixed Base Price</span>
+<span class="text-[#E7E2D6]">|</span>
+<span class="text-[#242320]">Starting from ₹8,000</span>
+</div>
+<div class="text-3xl font-bold tracking-tight text-[#141413]">
+          ₹8,000
+        </div>
+</div>
+</section>
+<!-- END: TitleAndPriceBanner -->
+<!-- BEGIN: Studio Console & Sticky Checkout Rail Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative">
+<!-- LEFT COLUMN: Interactive Studio Console (7 Cols) -->
+<div class="lg:col-span-7 space-y-6">
+<!-- Hidden Radio Inputs for pure CSS tabs -->
+<input checked="" class="hidden peer/specs" id="tab-specs" name="studio_tab" type="radio"/>
+<input class="hidden peer/docs" id="tab-docs" name="studio_tab" type="radio"/>
+<div>
+<!-- Console Segment Switcher Bar -->
+<div class="bg-white border border-[#E7E2D6] rounded-xl p-1.5 shadow-sm flex items-center justify-between mb-5">
+<div class="flex items-center space-x-1 w-full sm:w-auto">
+<label class="cursor-pointer text-xs font-semibold px-4 py-2 rounded-lg transition-all flex items-center gap-2 select-none" for="tab-specs" id="btn-specs">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Tech Architecture &amp; Deliverables</span>
+</label>
+<label class="cursor-pointer text-xs font-semibold px-4 py-2 rounded-lg transition-all flex items-center gap-2 select-none" for="tab-docs" id="btn-docs">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Included Documentation Preview</span>
+<span class="text-[10px] bg-[#EDEAE0] text-[#141413] px-1.5 py-0.5 rounded font-mono font-bold">6</span>
+</label>
+</div>
+<div class="hidden sm:flex items-center space-x-1.5 pr-3 text-[11px] text-[#727068]">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+<span>Ready for release</span>
+</div>
+</div>
+<!-- TAB PANEL 1: Project Specifications & Tech Architecture -->
+<div class="space-y-6" id="panel-specs">
+<!-- Card: Project Specifications -->
+<section class="bg-white border border-[#E7E2D6] rounded-xl p-6 shadow-sm space-y-6" data-purpose="project-specifications">
+<!-- Card Header -->
+<div class="flex items-center justify-between pb-4 border-b border-[#E7E2D6]/70">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 rounded-lg bg-[#FAF8F5] border border-[#E7E2D6] flex items-center justify-center text-[#141413]">
+<svg class="w-4 h-4 text-[#242320]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+</div>
+<div>
+<h2 class="text-base font-bold text-[#141413] tracking-tight">Project Specifications</h2>
+<p class="text-xs text-[#727068]">Full architectural stack, modules, and source bundle details</p>
+</div>
+</div>
+<span class="text-[11px] font-medium bg-[#FAF8F5] text-[#727068] border border-[#E7E2D6] px-2.5 py-0.5 rounded-full">
+                  Documentation included
+                </span>
+</div>
+<!-- Feature Item Tags -->
+<div>
+<h3 class="text-xs font-semibold uppercase tracking-wider text-[#727068] mb-2.5">Features</h3>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+<div class="flex items-center space-x-2.5 px-3.5 py-2.5 border border-[#E7E2D6] rounded-lg bg-[#FAF8F5] text-xs font-medium text-[#141413] hover:border-[#141413]/30 transition-colors">
+<span class="w-1.5 h-1.5 rounded-sm bg-[#141413]"></span>
+<span>Full-stack</span>
+</div>
+<div class="flex items-center space-x-2.5 px-3.5 py-2.5 border border-[#E7E2D6] rounded-lg bg-[#FAF8F5] text-xs font-medium text-[#141413] hover:border-[#141413]/30 transition-colors">
+<span class="w-1.5 h-1.5 rounded-sm bg-[#141413]"></span>
+<span>API integration</span>
+</div>
+<div class="flex items-center space-x-2.5 px-3.5 py-2.5 border border-[#E7E2D6] rounded-lg bg-[#FAF8F5] text-xs font-medium text-[#141413] hover:border-[#141413]/30 transition-colors">
+<span class="w-1.5 h-1.5 rounded-sm bg-[#141413]"></span>
+<span>Documentation included</span>
+</div>
+</div>
+</div>
+<!-- Tech Stack Tags -->
+<div>
+<div class="flex items-center justify-between mb-2.5">
+<h3 class="text-xs font-semibold uppercase tracking-wider text-[#727068]">Tech Stack</h3>
+<span class="text-[11px] font-mono text-[#727068]">Production-proven stack</span>
+</div>
+<div class="flex flex-wrap gap-2">
+<span class="inline-flex items-center space-x-2 px-3 py-1.5 rounded-lg border border-[#E7E2D6] bg-white text-xs font-medium text-[#141413] hover:bg-[#FAF8F5] transition">
+<span class="w-1.5 h-1.5 rounded-sm bg-emerald-600"></span>
+<span class="font-semibold">React</span>
+<span class="text-[10px] text-[#727068] font-mono pl-1 border-l border-[#E7E2D6]">v18.x</span>
+</span>
+<span class="inline-flex items-center space-x-2 px-3 py-1.5 rounded-lg border border-[#E7E2D6] bg-white text-xs font-medium text-[#141413] hover:bg-[#FAF8F5] transition">
+<span class="w-1.5 h-1.5 rounded-sm bg-emerald-600"></span>
+<span class="font-semibold">Node.js</span>
+<span class="text-[10px] text-[#727068] font-mono pl-1 border-l border-[#E7E2D6]">LTS</span>
+</span>
+<span class="inline-flex items-center space-x-2 px-3 py-1.5 rounded-lg border border-[#E7E2D6] bg-white text-xs font-medium text-[#141413] hover:bg-[#FAF8F5] transition">
+<span class="w-1.5 h-1.5 rounded-sm bg-emerald-600"></span>
+<span class="font-semibold">Express</span>
+<span class="text-[10px] text-[#727068] font-mono pl-1 border-l border-[#E7E2D6]">REST</span>
+</span>
+<span class="inline-flex items-center space-x-2 px-3 py-1.5 rounded-lg border border-[#E7E2D6] bg-white text-xs font-medium text-[#141413] hover:bg-[#FAF8F5] transition">
+<span class="w-1.5 h-1.5 rounded-sm bg-emerald-600"></span>
+<span class="font-semibold">PostgreSQL</span>
+<span class="text-[10px] text-[#727068] font-mono pl-1 border-l border-[#E7E2D6]">SQL</span>
+</span>
+</div>
+</div>
+<!-- Deliverables List Cards -->
+<div>
+<h3 class="text-xs font-semibold uppercase tracking-wider text-[#727068] mb-2.5">Deliverables</h3>
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+<div class="p-3 border border-[#E7E2D6] rounded-lg bg-[#FAF8F5] flex flex-col justify-between hover:border-[#141413]/30 transition group">
+<svg class="w-4 h-4 text-emerald-600 mb-2 stroke-[2.5]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<div>
+<span class="text-xs font-semibold text-[#141413] leading-snug block">Source code</span>
+<span class="text-[10px] text-[#727068]">Complete repository</span>
+</div>
+</div>
+<div class="p-3 border border-[#E7E2D6] rounded-lg bg-[#FAF8F5] flex flex-col justify-between hover:border-[#141413]/30 transition group">
+<svg class="w-4 h-4 text-emerald-600 mb-2 stroke-[2.5]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<div>
+<span class="text-xs font-semibold text-[#141413] leading-snug block">SRS</span>
+<span class="text-[10px] text-[#727068]">IEEE specification</span>
+</div>
+</div>
+<div class="p-3 border border-[#E7E2D6] rounded-lg bg-[#FAF8F5] flex flex-col justify-between hover:border-[#141413]/30 transition group">
+<svg class="w-4 h-4 text-emerald-600 mb-2 stroke-[2.5]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<div>
+<span class="text-xs font-semibold text-[#141413] leading-snug block">API docs</span>
+<span class="text-[10px] text-[#727068]">Postman / Swagger</span>
+</div>
+</div>
+<div class="p-3 border border-[#E7E2D6] rounded-lg bg-[#FAF8F5] flex flex-col justify-between hover:border-[#141413]/30 transition group">
+<svg class="w-4 h-4 text-emerald-600 mb-2 stroke-[2.5]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<div>
+<span class="text-xs font-semibold text-[#141413] leading-snug block">Setup guide</span>
+<span class="text-[10px] text-[#727068]">Step-by-step env guide</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Console Preview Box -->
+<div class="p-3.5 bg-[#141413] rounded-lg text-white font-mono text-xs border border-black/40">
+<div class="flex items-center justify-between text-[11px] text-[#727068] border-b border-[#242320] pb-2 mb-2">
+<div class="flex items-center space-x-1.5">
+<span class="w-2 h-2 rounded-full bg-red-500/80"></span>
+<span class="w-2 h-2 rounded-full bg-yellow-500/80"></span>
+<span class="w-2 h-2 rounded-full bg-green-500/80"></span>
+<span class="text-neutral-400 font-sans ml-2 text-[10px]">project-architecture-preview</span>
+</div>
+<span class="text-[10px] text-neutral-400">clean code / production standard</span>
+</div>
+<p class="text-neutral-300 text-[11px] leading-relaxed">
+<span class="text-emerald-400">$</span> git clone &amp;&amp; npm install &amp;&amp; npm run dev<br/>
+<span class="text-[#727068]">// Server running on port 5000 • Database connected to PostgreSQL</span>
+</p>
+</div>
+</section>
+</div>
+<!-- TAB PANEL 2: Sample Documentation Preview -->
+<div class="space-y-6 hidden" id="panel-docs">
+<!-- Card: Sample Documentation -->
+<section class="bg-white border border-[#E7E2D6] rounded-xl p-6 shadow-sm space-y-5" data-purpose="sample-documentation">
+<!-- Card Header -->
+<div class="flex items-center justify-between pb-3 border-b border-[#E7E2D6]/70">
+<div>
+<h2 class="text-base font-bold text-[#141413] tracking-tight">Sample Documentation</h2>
+<p class="text-xs text-[#727068] mt-0.5">Preview standard documents included in the deployment bundle</p>
+</div>
+<span class="text-[11px] font-medium bg-[#EDEAE0] text-[#141413] border border-[#E7E2D6] px-2.5 py-0.5 rounded-full shrink-0">
+                  6 Modules Included
+                </span>
+</div>
+<!-- Documentation Grid 3x2 -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+<!-- SRS -->
+<a class="p-3.5 border border-[#E7E2D6] rounded-lg bg-[#FAF8F5] hover:bg-white hover:border-[#141413]/40 transition group block" href="#">
+<div class="flex items-center justify-between mb-1.5">
+<span class="text-xs font-bold text-[#141413] group-hover:text-black">SRS</span>
+<span class="text-[#727068] text-xs group-hover:text-black">↗</span>
+</div>
+<p class="text-[11px] text-[#727068] leading-tight">Included in documentation bundle</p>
+</a>
+<!-- ER diagram -->
+<a class="p-3.5 border border-[#E7E2D6] rounded-lg bg-[#FAF8F5] hover:bg-white hover:border-[#141413]/40 transition group block" href="#">
+<div class="flex items-center justify-between mb-1.5">
+<span class="text-xs font-bold text-[#141413] group-hover:text-black">ER diagram</span>
+<span class="text-[#727068] text-xs group-hover:text-black">↗</span>
+</div>
+<p class="text-[11px] text-[#727068] leading-tight">Included in documentation bundle</p>
+</a>
+<!-- API docs -->
+<a class="p-3.5 border border-[#E7E2D6] rounded-lg bg-[#FAF8F5] hover:bg-white hover:border-[#141413]/40 transition group block" href="#">
+<div class="flex items-center justify-between mb-1.5">
+<span class="text-xs font-bold text-[#141413] group-hover:text-black">API docs</span>
+<span class="text-[#727068] text-xs group-hover:text-black">↗</span>
+</div>
+<p class="text-[11px] text-[#727068] leading-tight">Included in documentation bundle</p>
+</a>
+<!-- Setup guide -->
+<a class="p-3.5 border border-[#E7E2D6] rounded-lg bg-[#FAF8F5] hover:bg-white hover:border-[#141413]/40 transition group block" href="#">
+<div class="flex items-center justify-between mb-1.5">
+<span class="text-xs font-bold text-[#141413] group-hover:text-black">Setup guide</span>
+<span class="text-[#727068] text-xs group-hover:text-black">↗</span>
+</div>
+<p class="text-[11px] text-[#727068] leading-tight">Included in documentation bundle</p>
+</a>
+<!-- User manual -->
+<a class="p-3.5 border border-[#E7E2D6] rounded-lg bg-[#FAF8F5] hover:bg-white hover:border-[#141413]/40 transition group block" href="#">
+<div class="flex items-center justify-between mb-1.5">
+<span class="text-xs font-bold text-[#141413] group-hover:text-black">User manual</span>
+<span class="text-[#727068] text-xs group-hover:text-black">↗</span>
+</div>
+<p class="text-[11px] text-[#727068] leading-tight">Included in documentation bundle</p>
+</a>
+<!-- PPT -->
+<a class="p-3.5 border border-[#E7E2D6] rounded-lg bg-[#FAF8F5] hover:bg-white hover:border-[#141413]/40 transition group block" href="#">
+<div class="flex items-center justify-between mb-1.5">
+<span class="text-xs font-bold text-[#141413] group-hover:text-black">PPT</span>
+<span class="text-[#727068] text-xs group-hover:text-black">↗</span>
+</div>
+<p class="text-[11px] text-[#727068] leading-tight">Included in documentation bundle</p>
+</a>
+</div>
+</section>
+</div>
+<!-- Bottom Assurance Callout -->
+<div class="p-4 bg-[#EDEAE0] border border-[#E7E2D6] rounded-xl flex items-center justify-between">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 rounded-full bg-white border border-[#E7E2D6] flex items-center justify-center shrink-0">
+<svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div>
+<h4 class="text-xs font-bold text-[#141413]">Standard Academic &amp; Professional Submission Ready</h4>
+<p class="text-[11px] text-[#727068]">All deliverables verified against modern industry architecture guidelines.</p>
+</div>
+</div>
+<span class="text-[10px] font-mono text-[#727068] uppercase hidden sm:block">ISO/IEEE standard</span>
+</div>
+</div>
+</div>
+<!-- END: LEFT COLUMN -->
+<!-- RIGHT COLUMN: Sticky Checkout Rail & Live Status Tracker (5 Cols) -->
+<div class="lg:col-span-5 space-y-6 lg:sticky lg:top-20">
+<!-- Step Indicator Tracker -->
+<div class="flex items-center justify-between sm:justify-end sm:space-x-2 text-[11px] font-semibold text-[#727068]" data-purpose="checkout-steps">
+<div class="flex items-center space-x-1.5 text-[#141413]">
+<span class="w-5 h-5 rounded border border-[#141413] flex items-center justify-center text-[10px] bg-white font-bold">1</span>
+<span>Select option</span>
+</div>
+<span class="text-[#E7E2D6]">———</span>
+<div class="flex items-center space-x-1.5 text-[#727068]">
+<span class="w-5 h-5 rounded border border-[#E7E2D6] flex items-center justify-center text-[10px] bg-white">2</span>
+<span>Payment</span>
+</div>
+<span class="text-[#E7E2D6]">———</span>
+<div class="flex items-center space-x-1.5 text-[#727068]">
+<span class="w-5 h-5 rounded border border-[#E7E2D6] flex items-center justify-center text-[10px] bg-white">3</span>
+<span>Verify</span>
+</div>
+</div>
+<!-- Sticky Checkout Card: Select Purchase Option + Order Summary -->
+<div class="bg-white border border-[#E7E2D6] rounded-xl p-5 shadow-sm space-y-5" data-purpose="integrated-checkout-rail">
+<!-- Step 1 Header -->
+<div class="border-b border-[#E7E2D6]/70 pb-3">
+<h2 class="text-sm font-bold text-[#141413]">Step 1 • Select purchase option</h2>
+<p class="text-xs text-[#727068] mt-0.5">Choose how you'd like to proceed</p>
+</div>
+<!-- Radio Selector Group -->
+<div class="space-y-2.5">
+<!-- Direct Buy Option (Active) -->
+<label class="flex items-center justify-between p-3.5 border-2 border-[#141413] rounded-xl bg-white cursor-pointer relative shadow-sm hover:border-black transition">
+<div class="flex items-center space-x-3">
+<input checked="" class="w-4 h-4 text-[#141413] border-[#E7E2D6] focus:ring-0 accent-black" name="purchase_option" type="radio"/>
+<div>
+<div class="text-xs font-bold text-[#141413] flex items-center gap-1.5">
+<span>Direct Buy</span>
+<span class="text-[10px] font-medium bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded font-mono">Immediate</span>
+</div>
+<div class="text-[11px] text-[#727068]">₹8,000 — start immediately</div>
+</div>
+</div>
+<span class="text-xs font-bold text-[#141413]">₹8,000</span>
+</label>
+<!-- Enquiry Form Option -->
+<label class="flex items-center justify-between p-3.5 border border-[#E7E2D6] rounded-xl bg-[#FAF8F5] hover:bg-white hover:border-[#141413]/40 cursor-pointer transition">
+<div class="flex items-center space-x-3">
+<input class="w-4 h-4 text-[#141413] border-[#E7E2D6] focus:ring-0 accent-black" name="purchase_option" type="radio"/>
+<div>
+<div class="text-xs font-bold text-[#141413]">Enquiry Form</div>
+<div class="text-[11px] text-[#727068]">Custom requirements, get a quote</div>
+</div>
+</div>
+<span class="text-[11px] font-medium text-[#727068]">Get quote</span>
+</label>
+</div>
+<!-- Order Summary Inner Box -->
+<div class="bg-[#FAF8F5] border border-[#E7E2D6] rounded-xl p-4 space-y-3.5">
+<!-- Item info -->
+<div class="flex items-start space-x-3 pb-3 border-b border-[#E7E2D6]/80">
+<div class="w-9 h-9 rounded-lg bg-white border border-[#E7E2D6] flex items-center justify-center shrink-0">
+<svg class="w-4 h-4 text-[#242320]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+</div>
+<div class="flex-grow">
+<h3 class="text-xs font-bold text-[#141413] leading-tight">Frontend + Backend Project</h3>
+<div class="text-[10px] uppercase font-semibold text-[#727068] tracking-wider mt-0.5">FRONTEND + BACKEND</div>
+</div>
+</div>
+<!-- Price Breakdown -->
+<div class="space-y-1.5 text-xs">
+<div class="flex justify-between text-[#242320]">
+<span>Project price</span>
+<span class="font-semibold text-[#141413]">₹8,000</span>
+</div>
+<div class="flex justify-between text-emerald-700 font-medium">
+<span class="flex items-center space-x-1">
+<span>Documentation included</span>
+</span>
+<span>₹0</span>
+</div>
+</div>
+<!-- Total Order -->
+<div class="pt-2.5 border-t border-[#E7E2D6] flex items-baseline justify-between">
+<span class="text-xs font-bold tracking-wider text-[#141413] uppercase">ORDER TOTAL</span>
+<div class="text-right">
+<span class="text-2xl font-bold text-[#141413]">₹8,000</span>
+<span class="block text-[10px] text-[#727068]">Includes taxes &amp; documentation</span>
+</div>
+</div>
+</div>
+<!-- Checkout CTA Button -->
+<button class="w-full bg-[#141413] hover:bg-black text-white py-3 px-4 rounded-xl text-xs font-bold tracking-wider uppercase shadow-sm transition flex items-center justify-center space-x-2">
+<span>Proceed to Payment</span>
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<!-- What You Get Perks (Trust seals) -->
+<div class="pt-3 border-t border-[#E7E2D6]/80 space-y-2.5">
+<div class="text-[10px] font-bold uppercase tracking-wider text-[#727068]">What you get</div>
+<div class="space-y-2">
+<div class="flex items-start space-x-2.5">
+<svg class="w-4 h-4 text-emerald-600 mt-0.5 shrink-0 stroke-[2.2]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<div>
+<div class="text-xs font-semibold text-[#141413] leading-tight">Source code + documentation delivered</div>
+<div class="text-[11px] text-[#727068] mt-0.5">Delivered instantly after verification</div>
+</div>
+</div>
+<div class="flex items-start space-x-2.5">
+<svg class="w-4 h-4 text-emerald-600 mt-0.5 shrink-0 stroke-[2.2]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<div>
+<div class="text-xs font-semibold text-[#141413] leading-tight">Secure payment</div>
+<div class="text-[11px] text-[#727068] mt-0.5">UPI, cards &amp; net banking protected</div>
+</div>
+</div>
+<div class="flex items-start space-x-2.5">
+<svg class="w-4 h-4 text-emerald-600 mt-0.5 shrink-0 stroke-[2.2]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<div>
+<div class="text-xs font-semibold text-[#141413] leading-tight">Support after delivery</div>
+<div class="text-[11px] text-[#727068] mt-0.5">Help with setup &amp; questions</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Help footer link -->
+<div class="pt-2 text-center border-t border-[#E7E2D6]/70">
+<a class="inline-flex items-center space-x-1.5 text-[11px] font-medium text-[#727068] hover:text-[#141413] transition" href="#">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span>Need help? Contact us</span>
+</a>
+</div>
+</div>
+<!-- Integrated Collapsible Live Payment Status Tracker -->
+<details class="group bg-white border border-[#E7E2D6] rounded-xl p-5 shadow-sm transition" data-purpose="payment-status-timeline" open="">
+<summary class="flex items-center justify-between cursor-pointer list-none select-none">
+<div class="flex items-center space-x-2">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<h2 class="text-sm font-bold text-[#141413]">Live Order Verification Status</h2>
+</div>
+<div class="flex items-center space-x-2">
+<span class="text-[11px] font-mono text-[#727068] bg-[#FAF8F5] px-2 py-0.5 rounded border border-[#E7E2D6]">Stage 1 of 4</span>
+<svg class="w-4 h-4 text-[#727068] transition group-open:rotate-180" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</summary>
+<!-- Vertical Timeline Steps Content -->
+<div class="mt-4 pt-4 border-t border-[#E7E2D6]/70 space-y-3.5 pl-1">
+<!-- Step 1: Active -->
+<div class="flex items-start space-x-3">
+<span class="w-5 h-5 rounded bg-[#141413] text-white font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5 shadow-sm">1</span>
+<div>
+<div class="text-xs font-bold text-[#141413] tracking-wide uppercase">Order Placed</div>
+<div class="text-[11px] text-[#727068] leading-tight">Order confirmed, awaiting payment</div>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="flex items-start space-x-3">
+<span class="w-5 h-5 rounded border border-[#E7E2D6] bg-[#FAF8F5] text-[#727068] font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">2</span>
+<div>
+<div class="text-xs font-semibold text-[#242320] uppercase">Payment Submitted</div>
+<div class="text-[11px] text-[#727068]">Pending</div>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="flex items-start space-x-3">
+<span class="w-5 h-5 rounded border border-[#E7E2D6] bg-[#FAF8F5] text-[#727068] font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">3</span>
+<div>
+<div class="text-xs font-semibold text-amber-700 uppercase">Under Verification</div>
+<div class="text-[11px] text-[#727068]">Pending</div>
+</div>
+</div>
+<!-- Step 4 -->
+<div class="flex items-start space-x-3">
+<span class="w-5 h-5 rounded border border-[#E7E2D6] bg-[#FAF8F5] text-[#727068] font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">4</span>
+<div>
+<div class="text-xs font-semibold text-emerald-700 uppercase">Confirmed</div>
+<div class="text-[11px] text-[#727068]">Pending</div>
+</div>
+</div>
+<!-- Order Summary Details Box -->
+<div class="mt-4 p-3.5 bg-[#FAF8F5] border border-[#E7E2D6] rounded-lg space-y-2 text-xs">
+<div class="flex items-center justify-between">
+<span class="text-[#727068] font-medium">ORDER ID</span>
+<div class="flex items-center space-x-2 font-mono font-semibold text-[#141413]">
+<span>ORD-1793353005064--</span>
+<button class="text-[10px] font-sans font-medium text-[#727068] hover:text-black uppercase underline decoration-dotted">Copy</button>
+</div>
+</div>
+<div class="flex items-center justify-between pt-1 border-t border-[#E7E2D6]/60">
+<span class="text-[#727068] font-medium">Amount paid</span>
+<span class="font-bold text-[#141413]">₹8,000</span>
+</div>
+<p class="text-[10px] text-[#727068] pt-1 border-t border-[#E7E2D6]/60 leading-normal">
+                Verification usually takes up to 24 hours. We'll notify you once confirmed.
+              </p>
+</div>
+</div>
+</details>
+</div>
+<!-- END: RIGHT COLUMN -->
+</div>
+<!-- END: Studio Console & Sticky Checkout Rail Grid -->
+</main>
+<!-- END: MainContent -->
+<!-- Simple Footer note for polish -->
+<footer class="mt-auto border-t border-[#E7E2D6] bg-[#F7F4EC] py-6 text-center text-xs text-[#727068]">
+<div class="max-w-[1280px] mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+<span>© CareerShelf. All rights reserved.</span>
+<div class="flex items-center space-x-4">
+<a class="hover:text-[#141413]" href="#">Terms</a>
+<a class="hover:text-[#141413]" href="#">Privacy</a>
+<a class="hover:text-[#141413]" href="#">Documentation Policies</a>
+</div>
+</div>
+</footer>
+</body>
+</html>
