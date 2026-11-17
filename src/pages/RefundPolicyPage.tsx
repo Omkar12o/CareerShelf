@@ -90,8 +90,8 @@ export function RefundPolicyPage() {
                 <li>The product you purchased;</li>
                 <li>The date of purchase;</li>
                 <li>
-                  The order ID or the Razorpay payment ID (found in your
-                  receipt email); and
+                  The order ID or the UPI reference number (UTR) from your
+                  payment confirmation; and
                 </li>
                 <li>
                   A short description of why the product did not meet its

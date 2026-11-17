@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import type { LucideIcon } from 'lucide-react'
 import {
+  Inbox,
   LayoutDashboard,
   LogOut,
   Package,
@@ -28,6 +29,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/admin/products', label: 'Products', icon: Package, end: false },
   { to: '/admin/services', label: 'Services', icon: Wrench, end: false },
   { to: '/admin/orders', label: 'Orders', icon: ReceiptText, end: false },
+  { to: '/admin/requests', label: 'Requests', icon: Inbox, end: false },
 ]
 
 function navClasses(isActive: boolean, mobile: boolean): string {

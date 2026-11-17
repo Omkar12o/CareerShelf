@@ -1,8 +1,7 @@
-import { Link } from 'react-router-dom'
-import { PRODUCTS, formatPrice } from '../data/products'
 import { GsapReveal } from '../components/GsapReveal'
 import { Button } from '../components/Button'
 import { Badge } from '../components/Badge'
+import { PRODUCTS } from '../data/products'
 
 const packages = [
   { name: 'Normal Project', price: 'Starting from ₹3,000', note: 'Documentation included' },
@@ -16,53 +15,68 @@ export function ServicesPage() {
   const services = PRODUCTS.filter((p) => p.category === 'service')
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-      <GsapReveal>
-        <h1 className="text-4xl font-bold text-gray-900">Projects & Services</h1>
-        <p className="mt-3 max-w-2xl text-gray-600">
-          Software projects and services, each delivered with full documentation.
-        </p>
-      </GsapReveal>
+    <section className="section-padding bg-navy-50">
+      <div className="max-w-7xl mx-auto">
+        <GsapReveal>
+          <h1 className="text-4xl font-bold text-navy-600 mb-4">Projects & Services</h1>
+          <p className="text-navy-400 text-lg mb-6">
+            Software projects and services, each delivered with full documentation.
+          </p>
+        </GsapReveal>
 
-      <GsapReveal delay={0.1} stagger={0.08}>
-        <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {packages.map((pkg) => (
-            <div key={pkg.name} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-gray-900">{pkg.name}</h3>
-              <p className="mt-2 text-xl font-extrabold text-brand-600">{pkg.price}</p>
-              <Badge color="brand" className="mt-3">{pkg.note}</Badge>
-            </div>
-          ))}
-        </div>
-      </GsapReveal>
-
-      <GsapReveal delay={0.2} stagger={0.06}>
-        <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {services.map((s) => (
-            <div key={s.id} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-gray-900">{s.title}</h3>
-              <p className="mt-2 text-sm text-gray-600">{s.shortDescription}</p>
-              <p className="mt-4 text-xl font-extrabold text-gray-900">
-                {s.price === 0 ? 'Contact for quote' : formatPrice(s.price)}
-              </p>
-              <div className="mt-4 flex gap-2">
-                <Button to={`/services/${s.slug}`} size="sm">View details</Button>
-                <Button to="/contact" variant="outline" size="sm">Enquire</Button>
+        <GsapReveal delay={0.1} stagger={0.08}>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {packages.map((pkg) => (
+              <div
+                key={pkg.name}
+                className="bg-white rounded-2xl p-6 shadow-lg border-border hover:border-emerald-200 hover:shadow-lg transition-all duration-300"
+              >
+                <h3 className="text-lg font-bold text-navy-600">{pkg.name}</h3>
+                <p className="mt-2 text-xl font-bold text-emerald-600">{pkg.price}</p>
+                <Badge color="emerald" className="mt-3">{pkg.note}</Badge>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+        </GsapReveal>
+
+        <GsapReveal delay={0.2} stagger={0.06}>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {services.map((s) => (
+              <div
+                key={s.id}
+                className="bg-white rounded-2xl p-6 shadow-lg border-border hover:border-emerald-200 hover:shadow-lg transition-all duration-300"
+              >
+                <h3 className="text-lg font-bold text-navy-600">{s.title}</h3>
+                <p className="mt-2 text-sm text-navy-500">{s.shortDescription}</p>
+                <p className="mt-4 text-xl font-extrabold text-emerald-600">
+                  {s.price === 0 ? 'Contact for quote' : '₹' + s.price}
+                </p>
+                <div className="mt-4 flex gap-2">
+                  <Button to={`/services/${s.slug}`} size="sm">
+                    View details
+                  </Button>
+                  <Button to="/contact" variant="outline" size="sm">
+                    Enquire
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </GsapReveal>
+
+        {services.length === 0 && (
+          <p className="mt-10 text-navy-400">No services available yet.</p>
+        )}
+
+        <div className="mt-12">
+          <a
+            href="/products?category=service"
+            className="text-emerald-600 font-semibold hover:text-navy-600 transition-colors underline"
+          >
+            View all in products →
+          </a>
         </div>
-      </GsapReveal>
-
-      {services.length === 0 && (
-        <p className="mt-10 text-gray-500">No services available yet.</p>
-      )}
-
-      <div className="mt-12">
-        <Link to="/products?category=service" className="text-brand-600 font-semibold hover:underline">
-          View all in products →
-        </Link>
       </div>
-    </div>
+    </section>
   )
 }

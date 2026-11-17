@@ -1,353 +1,353 @@
+import { Link } from 'react-router-dom'
 import {
-  BookOpen,
-  Users,
-  MessagesSquare,
-  PhoneCall,
-  FileText,
-  Link2,
   ArrowRight,
+  BadgeCheck,
+  BookOpen,
+  ClipboardCheck,
+  FileText,
+  MessagesSquare,
+  Presentation,
+  ShieldCheck,
   Sparkles,
-  CheckCircle2,
+  Star,
 } from 'lucide-react'
-import { Hero } from '../components/Hero'
-import { SectionHeading } from '../components/SectionHeading'
+import { StatsCounter } from '../components/StatsCounter'
+import { YearFilterCards } from '../components/YearFilterCards'
+import { WhatYouGet } from '../components/WhatYouGet'
+import { FeaturedProjectsGrid } from '../components/FeaturedProjectsGrid'
+import { CareerSectionTeaser } from '../components/CareerSectionTeaser'
+import { HowItWorks } from '../components/HowItWorks'
+import { FaqAccordion } from '../components/FaqAccordion'
 import { TestimonialCard, type Testimonial } from '../components/Testimonial'
-import { ProductCard } from '../components/ProductCard'
-import { ConsultancyCard } from '../components/ConsultancyCard'
-import { Button } from '../components/Button'
-import { Reveal } from '../components/Reveal'
-import { GsapReveal } from '../components/GsapReveal'
 import { PRODUCTS } from '../data/products'
+import { usePageMeta } from '../lib/seo'
 
-const features = [
-  {
-    icon: BookOpen,
-    title: 'Digital ebooks',
-    description:
-      'Straightforward career guides with templates and before/after examples — no fluff, no filler chapters.',
-  },
-  {
-    icon: Users,
-    title: 'HR contact lists',
-    description:
-      'Verified email and LinkedIn contacts at thousands of companies, refreshed quarterly so you reach real humans.',
-  },
-  {
-    icon: MessagesSquare,
-    title: 'Interview question sets',
-    description:
-      'Structured question banks with frameworks and worked answers across engineering, PM, and data roles.',
-  },
-  {
-    icon: PhoneCall,
-    title: 'Consultancy calls',
-    description:
-      '1-on-1 calls for strategy sprints, deep resume reviews, and mock interviews — with written notes after every call.',
-  },
-  {
-    icon: FileText,
-    title: 'Resume guides',
-    description:
-      'Downloadable templates and guides built to pass ATS scans and still read beautifully to hiring managers.',
-  },
-  {
-    icon: Link2,
-    title: 'Reference & referrals',
-    description:
-      'Warm, personalized introductions to hiring managers and product leaders at companies actively hiring.',
-  },
+const trustPoints = [
+  'Source code + PPT + documentation',
+  'Submission-ready viva Q&A',
+  'Delivered in 1–3 days',
+]
+
+const kitItems = [
+  { icon: BookOpen, label: 'Full source code' },
+  { icon: FileText, label: 'Report, SRS & diagrams' },
+  { icon: Presentation, label: 'Review presentation' },
+  { icon: ClipboardCheck, label: 'Viva questions & answers' },
+  { icon: ShieldCheck, label: 'Setup guide + support' },
 ]
 
 const testimonials: Testimonial[] = [
   {
-    name: 'Priya Sharma',
-    role: 'Product Manager @ fintech startup',
-    initials: 'PS',
+    name: 'Aditi Rane',
+    role: 'BCA · Final year, Pune',
+    initials: 'AR',
     quote:
-      'The PM question set paid for itself. I used the frameworks in every single round and had an offer within three weeks.',
+      'The documentation alone saved me a week. My guide asked for SRS, ER diagrams, and test cases — everything was already there and correctly formatted.',
     rating: 5,
   },
   {
-    name: 'Daniel Kim',
-    role: 'Senior Software Engineer',
-    initials: 'DK',
+    name: 'Rahul Verma',
+    role: 'BE CSE · 3rd year',
+    initials: 'RV',
     quote:
-      'I sent out 40 emails from the HR list and got 9 responses. Nine. Nothing else I tried even came close to that reply rate.',
+      'I bought a MERN project for my internship portfolio. The code was clean enough that I could actually explain every part in the interview.',
     rating: 5,
   },
   {
-    name: 'Amara Osei',
-    role: 'Career changer · data analyst',
-    initials: 'AO',
+    name: 'Sneha Kulkarni',
+    role: 'MCA · Passout',
+    initials: 'SK',
     quote:
-      'The resume blueprint helped me rewrite my resume in an evening. Two weeks later I had my first data interview scheduled.',
+      'The interview question sets were exactly what campus placements asked. I used the STAR frameworks in three rounds and cleared two of them.',
     rating: 4,
   },
 ]
 
 export function HomePage() {
-  const featured = PRODUCTS.filter((p) => p.featured)
-  const consultancy = PRODUCTS.filter((p) => p.category === 'consultancy')
-  const newArrivals = PRODUCTS.filter(
-    (p) => p.badge === 'New' && p.category !== 'consultancy',
-  )
+  usePageMeta({
+    title: 'Projects, interview prep & careers for tech students',
+    description:
+      'Ready-made college projects with source code, documentation, PPT and viva Q&A — plus interview preparation and career support for BCA, MCA, BSc CS and BE/BTech students.',
+  })
+
+  const featured = PRODUCTS.filter((product) => product.featured).slice(0, 3)
 
   return (
     <>
-      <Hero />
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-navy-950 text-white">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-grid-dark [mask-image:radial-gradient(ellipse_65%_75%_at_50%_0%,black,transparent)]"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-40 -top-24 size-[32rem] rounded-full bg-indigo-600/25 blur-3xl"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-32 top-24 size-[28rem] rounded-full bg-emerald-500/20 blur-3xl"
+        />
 
-      {/* What you get — dark contrast band */}
-      <section className="relative overflow-hidden bg-gray-950">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-grid-dark [mask-image:radial-gradient(ellipse_70%_70%_at_50%_0%,black,transparent)]"
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-40 top-0 size-[32rem] rounded-full bg-brand-600/25 blur-3xl"
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -left-40 bottom-0 size-[28rem] rounded-full bg-accent-500/10 blur-3xl"
-        />
-        <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
-          <Reveal>
-            <SectionHeading
-              eyebrow="What you get"
-              title={
-                <>
-                  Everything you need to go from{' '}
-                  <span className="text-brand-400">applied</span> to{' '}
-                  <span className="text-accent-400">hired</span>
-                </>
-              }
-              subtitle="One store with the tools that actually move the needle in a job search — researched, tested, and kept up to date."
-              dark
+        <div className="container-page relative grid items-center gap-14 py-16 lg:grid-cols-[1.15fr_1fr] lg:py-24">
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-xs font-semibold text-navy-100">
+              <Sparkles className="size-3.5 text-emerald-400" />
+              Trusted by 15,000+ students across 40+ colleges
+            </span>
+
+            <h1 className="mt-6 text-4xl font-extrabold leading-[1.06] tracking-tight text-white sm:text-5xl lg:text-6xl">
+              Submit a project your guide
+              <span className="text-indigo-300"> actually approves.</span>
+            </h1>
+
+            <p className="mt-5 max-w-xl text-lg leading-relaxed text-navy-200">
+              Ready-made mini and final-year projects for 1st year through
+              passout — with source code, documentation, PPT, and viva answers
+              included. Interview prep and career support when you are ready for
+              placements.
+            </p>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Link
+                to="/projects"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-7 py-3.5 text-sm font-bold text-navy-900 shadow-lg shadow-navy-950/40 transition-transform hover:-translate-y-0.5"
+              >
+                Browse projects
+                <ArrowRight className="size-4" />
+              </Link>
+              <Link
+                to="/request-project"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-7 py-3.5 text-sm font-bold text-white transition-colors hover:border-white/40 hover:bg-white/20"
+              >
+                Request a custom project
+              </Link>
+            </div>
+
+            <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium text-navy-200">
+              {trustPoints.map((point) => (
+                <li key={point} className="inline-flex items-center gap-1.5">
+                  <BadgeCheck className="size-4 shrink-0 text-emerald-400" />
+                  {point}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="relative">
+            <div
+              aria-hidden="true"
+              className="absolute -inset-6 -z-10 rounded-[2rem] bg-gradient-to-br from-indigo-500/25 via-transparent to-emerald-500/20 blur-2xl"
             />
-          </Reveal>
-          <GsapReveal delay={0.1} stagger={0.08}>
-            <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {features.map((feature) => (
-                <div
-                  key={feature.title}
-                  className="group rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-400/40 hover:bg-white/10"
-                >
-                  <span className="inline-flex size-11 items-center justify-center rounded-lg bg-brand-500/15 text-brand-300 transition-colors duration-200 group-hover:bg-brand-500/25 group-hover:text-brand-200">
-                    <feature.icon className="size-5.5" strokeWidth={1.8} />
-                  </span>
-                  <h3 className="mt-4 font-bold text-white">
-                    {feature.title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-gray-400">
-                    {feature.description}
+            <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-navy-300">
+                    Final-year kit
+                  </p>
+                  <p className="mt-1 text-lg font-bold text-white">
+                    Everything in one zip
                   </p>
                 </div>
-              ))}
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-bold text-emerald-300">
+                  <Star className="size-3" fill="currentColor" />
+                  4.8
+                </span>
+              </div>
+
+              <ul className="mt-6 space-y-3">
+                {kitItems.map((item) => (
+                  <li
+                    key={item.label}
+                    className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3.5 py-3"
+                  >
+                    <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-white/10 text-indigo-200">
+                      <item.icon className="size-4" />
+                    </span>
+                    <span className="text-sm font-medium text-navy-100">
+                      {item.label}
+                    </span>
+                    <BadgeCheck className="ml-auto size-4 shrink-0 text-emerald-400" />
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-6 flex items-center justify-between rounded-xl bg-navy-900/60 px-4 py-3">
+                <span className="text-sm text-navy-200">Starting from</span>
+                <span className="text-xl font-extrabold text-white">₹599</span>
+              </div>
             </div>
-          </GsapReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust stats */}
+      <section className="border-b border-border bg-white py-10 sm:py-12">
+        <div className="container-page">
+          <StatsCounter />
+        </div>
+      </section>
+
+      {/* Choose your year */}
+      <section className="section-padding bg-gray-50">
+        <div className="container-page">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-indigo-600">
+              Find your level
+            </p>
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+              Choose your year
+            </h2>
+            <p className="mt-3 text-base leading-relaxed text-gray-500">
+              Every kit is scoped to the effort your college expects — from a
+              first-year mini project to a full final-year submission.
+            </p>
+          </div>
+          <div className="mt-10">
+            <YearFilterCards />
+          </div>
+        </div>
+      </section>
+
+      {/* What you get */}
+      <section className="section-padding bg-white">
+        <div className="container-page">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-600">
+              Included by default
+            </p>
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+              What you get with every kit
+            </h2>
+            <p className="mt-3 text-base leading-relaxed text-gray-500">
+              Not just a code dump. Each project is packaged the way a college
+              submission actually needs it.
+            </p>
+          </div>
+          <div className="mt-10">
+            <WhatYouGet />
+          </div>
         </div>
       </section>
 
       {/* Featured products */}
-      <section className="bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
-          <Reveal>
-            <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
-              <SectionHeading
-                align="left"
-                eyebrow="Bestsellers"
-                title="Start with what works"
-                subtitle="The most popular products in the store, picked by fellow job seekers."
-                className="max-w-xl"
-              />
-              <Button to="/products" variant="outline">
-                Browse all products
-              </Button>
-            </div>
-          </Reveal>
-          <Reveal delay={120}>
-            <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {featured.map((product) =>
-                product.category === 'consultancy' ? (
-                  <ConsultancyCard key={product.id} product={product} />
-                ) : (
-                  <ProductCard key={product.id} product={product} />
-                ),
-              )}
-            </div>
-          </Reveal>
+      <section className="section-padding bg-gray-50">
+        <div className="container-page">
+          <FeaturedProjectsGrid
+            products={featured}
+            title="Featured this month"
+            subtitle="The most purchased products across every category — projects, interview sets, and career guides."
+          />
         </div>
       </section>
 
-      {/* Consultancy — light band with soft mesh */}
-      <section className="relative overflow-hidden bg-gray-50">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-32 top-10 size-96 rounded-full bg-accent-200/40 blur-3xl"
-        />
-        <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
-          <Reveal>
-            <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
-              <SectionHeading
-                align="left"
-                eyebrow="Consultancy"
-                title="Talk it through 1-on-1"
-                subtitle="Get a real person on a call — targeted feedback, a concrete plan, and written notes you keep afterward."
-                className="max-w-xl"
-              />
-              <Button to="/products?category=consultancy" variant="outline">
-                See all calls
-              </Button>
-            </div>
-          </Reveal>
-          <Reveal delay={120}>
-            <div className="mt-14 grid gap-6 md:grid-cols-3">
-              {consultancy.map((product) => (
-                <ConsultancyCard key={product.id} product={product} />
-              ))}
-            </div>
-          </Reveal>
-
-          <Reveal delay={140}>
-            <div className="relative mt-12 overflow-hidden rounded-2xl bg-gradient-to-r from-brand-600 via-brand-700 to-violet-700 px-8 py-10 text-white shadow-xl shadow-brand-700/20 sm:flex sm:items-center sm:justify-between lg:px-12">
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 bg-grid-dark [mask-image:radial-gradient(ellipse_60%_120%_at_0%_50%,black,transparent)]"
-              />
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-white/15 blur-3xl"
-              />
-              <div className="relative">
-                <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-brand-200">
-                  <Sparkles className="size-4" />
-                  Still deciding?
-                </p>
-                <h3 className="mt-2 text-2xl font-extrabold tracking-tight">
-                  Not sure which call you need?
-                </h3>
-                <p className="mt-2 max-w-lg text-sm text-brand-100">
-                  Tell us where you&apos;re stuck and we&apos;ll point you to
-                  the right session — no booking pressure.
-                </p>
-              </div>
-              <Button
-                to="/contact"
-                className="relative mt-6 shrink-0 bg-white text-brand-700 hover:bg-gray-100 sm:mt-0 sm:ml-6"
-              >
-                Ask us first
-                <ArrowRight className="size-4" />
-              </Button>
-            </div>
-          </Reveal>
+      {/* Career teaser */}
+      <section className="section-padding bg-white">
+        <div className="container-page">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-indigo-600">
+              Beyond the project
+            </p>
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+              Built for two kinds of students
+            </h2>
+            <p className="mt-3 text-base leading-relaxed text-gray-500">
+              Whether you still have submissions to clear or you are already
+              applying, the shelf has a track for you.
+            </p>
+          </div>
+          <div className="mt-10">
+            <CareerSectionTeaser />
+          </div>
         </div>
       </section>
 
-      {/* New arrivals */}
-      <section className="border-y border-gray-200 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
-          <Reveal>
-            <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
-              <SectionHeading
-                align="left"
-                eyebrow="New arrivals"
-                title="Fresh on the shelf"
-                subtitle="The newest guides and referral connections — recently added and already getting people noticed."
-                className="max-w-xl"
-              />
-              <Button to="/products?category=resume" variant="outline">
-                Browse new guides
-              </Button>
-            </div>
-          </Reveal>
-          <Reveal delay={120}>
-            <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {newArrivals.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </Reveal>
+      {/* How it works */}
+      <section className="section-padding bg-navy-50">
+        <div className="container-page">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-indigo-600">
+              Simple process
+            </p>
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+              How it works
+            </h2>
+          </div>
+          <div className="mt-10">
+            <HowItWorks />
+          </div>
         </div>
       </section>
 
       {/* Testimonials */}
-      <section className="relative overflow-hidden bg-gray-50">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -left-32 top-20 size-96 rounded-full bg-brand-200/40 blur-3xl"
-        />
-        <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
-          <Reveal>
-            <SectionHeading
-              eyebrow="Testimonials"
-              title="Job seekers trust the shelf"
-              subtitle="Real stories from people who used these products in real searches."
-            />
-          </Reveal>
-          <Reveal delay={120}>
-            <div className="mt-14 grid gap-6 md:grid-cols-3">
-              {testimonials.map((t) => (
-                <TestimonialCard key={t.name} testimonial={t} />
-              ))}
-            </div>
-          </Reveal>
+      <section className="section-padding bg-white">
+        <div className="container-page">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-600">
+              Student stories
+            </p>
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+              Students who stopped guessing
+            </h2>
+            <p className="mt-3 text-base leading-relaxed text-gray-500">
+              Real feedback from students who used these kits for submissions
+              and placements.
+            </p>
+          </div>
+          <div className="mt-10 grid gap-6 md:grid-cols-3">
+            {testimonials.map((testimonial) => (
+              <TestimonialCard
+                key={testimonial.name}
+                testimonial={testimonial}
+              />
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Final CTA — indigo gradient */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-brand-600 via-brand-700 to-violet-800">
+      {/* FAQ */}
+      <div className="bg-gray-50">
+        <FaqAccordion subtitle="Everything students ask before buying their first kit." />
+      </div>
+
+      {/* Final CTA */}
+      <section className="relative overflow-hidden bg-navy-950">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 bg-grid-dark [mask-image:radial-gradient(ellipse_60%_100%_at_50%_100%,black,transparent)]"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -left-32 -top-32 size-96 rounded-full bg-brand-400/30 blur-3xl"
+          className="pointer-events-none absolute -left-32 -top-32 size-96 rounded-full bg-indigo-600/25 blur-3xl"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-32 -bottom-32 size-96 rounded-full bg-accent-400/20 blur-3xl"
+          className="pointer-events-none absolute -bottom-32 -right-32 size-96 rounded-full bg-emerald-500/20 blur-3xl"
         />
-        <div className="relative mx-auto max-w-7xl px-4 py-24 text-center sm:px-6 lg:px-8 lg:py-32">
-          <Reveal>
-            <h2 className="mx-auto max-w-3xl text-4xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl">
-              Stop guessing. Start sending interviews your way.
-            </h2>
-            <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-brand-100">
-              Every product comes with instant access, lifetime updates, and a
-              30-day money-back guarantee.
-            </p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button
-                to="/products"
-                size="lg"
-                className="bg-white text-brand-700 shadow-xl shadow-brand-900/30 hover:bg-gray-100"
-              >
-                Shop the store
-                <ArrowRight className="size-5" />
-              </Button>
-              <Button
-                to="/about"
-                size="lg"
-                className="border-white/25 bg-white/10 text-white hover:border-white/40 hover:bg-white/20"
-              >
-                Meet the founder
-              </Button>
-            </div>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm font-semibold text-brand-100">
-              {['Instant download', 'Lifetime updates', '30-day refund'].map(
-                (item) => (
-                  <span
-                    key={item}
-                    className="inline-flex items-center gap-1.5"
-                  >
-                    <CheckCircle2 className="size-4 text-accent-400" />
-                    {item}
-                  </span>
-                ),
-              )}
-            </div>
-          </Reveal>
+        <div className="container-page relative py-20 text-center lg:py-24">
+          <h2 className="mx-auto max-w-3xl text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
+            Finish the project. Then get the offer.
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-navy-200 sm:text-lg">
+            Start with a ready-made kit today, or tell us your topic and we will
+            scope it, price it, and build it around your deadline.
+          </p>
+          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link
+              to="/projects"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-7 py-3.5 text-sm font-bold text-navy-900 shadow-lg shadow-navy-950/40 transition-transform hover:-translate-y-0.5 sm:w-auto"
+            >
+              Browse projects
+              <ArrowRight className="size-4" />
+            </Link>
+            <Link
+              to="/request-project"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-7 py-3.5 text-sm font-bold text-white transition-colors hover:border-white/40 hover:bg-white/20 sm:w-auto"
+            >
+              <MessagesSquare className="size-4" />
+              Talk to us about your project
+            </Link>
+          </div>
         </div>
       </section>
     </>

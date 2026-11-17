@@ -1,123 +1,229 @@
 @import "tailwindcss";
 
+/* ==========================================================================
+   CareerShelf — Design System
+   Premium ed-tech palette: navy (authority) + indigo (trust) + emerald (growth)
+   Tailwind CSS v4: tokens live in @theme, so they generate real utilities.
+   ========================================================================== */
+
 @theme {
-  --font-sans: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
-  --font-serif: "Luxury Garamond", Georgia, "Times New Roman", serif;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", Consolas, monospace;
 
-  /* Luxury palette mapped onto existing gray/brand/accent scales */
-  --color-gray-50: #f3eee4;
-  --color-gray-100: #e4dbcc;
-  --color-gray-200: #d5cab8;
-  --color-gray-300: #c6b89f;
-  --color-gray-400: #b69355;
-  --color-gray-500: #76591f;
-  --color-gray-600: #5f5750;
-  --color-gray-700: #46403a;
-  --color-gray-800: #302c29;
-  --color-gray-900: #262321;
-  --color-gray-950: #1a1817;
+  /* Navy — primary ink and dark surfaces */
+  --color-navy-50: #f5f7fb;
+  --color-navy-100: #e8edf6;
+  --color-navy-200: #cfd9ea;
+  --color-navy-300: #a8bad6;
+  --color-navy-400: #7791b8;
+  --color-navy-500: #56709a;
+  --color-navy-600: #3f567d;
+  --color-navy-700: #334664;
+  --color-navy-800: #22304a;
+  --color-navy-900: #111c2e;
+  --color-navy-950: #0a1220;
 
-  --color-brand-50: #f3eee4;
-  --color-brand-100: #e4dbcc;
-  --color-brand-200: #d5cab8;
-  --color-brand-300: #c6b89f;
-  --color-brand-400: #b69355;
-  --color-brand-500: #76591f;
-  --color-brand-600: #262321;
-  --color-brand-700: #262321;
-  --color-brand-800: #1a1817;
-  --color-brand-900: #0f0e0d;
+  /* Indigo — actions, links, focus */
+  --color-indigo-50: #eef2ff;
+  --color-indigo-100: #e0e7ff;
+  --color-indigo-200: #c7d2fe;
+  --color-indigo-300: #a5b4fc;
+  --color-indigo-400: #818cf8;
+  --color-indigo-500: #6366f1;
+  --color-indigo-600: #4f46e5;
+  --color-indigo-700: #4338ca;
+  --color-indigo-800: #3730a3;
+  --color-indigo-900: #312e81;
 
-  --color-accent-50: #f3eee4;
-  --color-accent-100: #e4dbcc;
-  --color-accent-200: #d5cab8;
-  --color-accent-300: #c6b89f;
-  --color-accent-400: #b69355;
-  --color-accent-500: #b69355;
-  --color-accent-600: #76591f;
-  --color-accent-700: #76591f;
+  /* Emerald — success, proof, growth */
+  --color-emerald-50: #ecfdf5;
+  --color-emerald-100: #d1fae5;
+  --color-emerald-200: #a7f3d0;
+  --color-emerald-300: #6ee7b7;
+  --color-emerald-400: #34d399;
+  --color-emerald-500: #10b981;
+  --color-emerald-600: #059669;
+  --color-emerald-700: #047857;
+  --color-emerald-800: #065f46;
 
-  --radius-xs: 0px;
-  --radius-sm: 0px;
-  --radius-md: 0px;
-  --radius-lg: 0px;
-  --radius-xl: 0px;
-  --radius-2xl: 0px;
-  --radius-3xl: 0px;
-  --radius-full: 0px;
+  /* Neutral ramp — cool slate so the whole app reads as one product */
+  --color-gray-50: #f8fafc;
+  --color-gray-100: #f1f5f9;
+  --color-gray-200: #e2e8f0;
+  --color-gray-300: #cbd5e1;
+  --color-gray-400: #94a3b8;
+  --color-gray-500: #64748b;
+  --color-gray-600: #475569;
+  --color-gray-700: #334155;
+  --color-gray-800: #1e293b;
+  --color-gray-900: #0f172a;
+  --color-gray-950: #020617;
 
-  --default-transition-duration: 150ms;
-  --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  /* `brand` and `accent` are the legacy token names used across the app.
+     They now point at navy/indigo so existing pages inherit the new look. */
+  --color-brand-50: #f5f7fb;
+  --color-brand-100: #e8edf6;
+  --color-brand-200: #cfd9ea;
+  --color-brand-300: #a8bad6;
+  --color-brand-400: #7791b8;
+  --color-brand-500: #56709a;
+  --color-brand-600: #3f567d;
+  --color-brand-700: #334664;
+  --color-brand-800: #22304a;
+  --color-brand-900: #111c2e;
+
+  --color-accent-50: #eef2ff;
+  --color-accent-100: #e0e7ff;
+  --color-accent-200: #c7d2fe;
+  --color-accent-300: #a5b4fc;
+  --color-accent-400: #818cf8;
+  --color-accent-500: #6366f1;
+  --color-accent-600: #4f46e5;
+  --color-accent-700: #4338ca;
+
+  /* Semantic aliases used by the newer components */
+  --color-border: #e2e8f0;
+  --color-muted: #64748b;
+  --color-surface: #ffffff;
 }
 
-:root {
-  --dp-color-ground: #f3eee4;
-  --dp-color-ground-2: #e4dbcc;
-  --dp-color-ink: #262321;
-  --dp-color-ink-2: #5f5750;
-  --dp-color-field: #262321;
-  --dp-color-field-deep: #302c29;
-  --dp-color-field-line: #46403a;
-  --dp-color-on-field: #f3eee4;
-  --dp-color-on-field-2: #c6bdb0;
-  --dp-color-panel: #e4dbcc;
-  --dp-color-panel-line: #c6b89f;
-  --dp-color-accent: #b69355;
-  --dp-color-accent-text: #76591f;
-  --dp-color-accent-light: #d2b071;
-  --dp-color-rule: #d5cab8;
-  --dp-typography-serif: "Luxury Garamond";
-  --dp-typography-sans: "Luxury Sans", "Helvetica Neue", Arial, sans-serif;
-  --dp-typography-body: 1rem;
-  --dp-typography-leading: 1.55;
-  --dp-spacing-pad: 3rem;
-  --dp-spacing-gap: 1.5rem;
-  --dp-spacing-pad-mid: 2rem;
-  --dp-spacing-pad-narrow: 1.25rem;
-  --dp-spacing-gap-compact: 1rem;
-  --dp-spacing-section-block: 6rem;
-  --dp-spacing-section-roomy: 7rem;
-  --dp-motion-interaction: 150ms;
-  --dp-motion-door-content: 600ms;
-  --dp-motion-door-delay: 450ms;
-  --dp-motion-door-easing: cubic-bezier(0.2, 0.7, 0.2, 1);
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-gray-50 font-sans text-gray-800 antialiased;
+    overflow-x: clip;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-display font-extrabold tracking-tight text-gray-900;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    @apply bg-indigo-100 text-indigo-900;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-indigo-500;
+  }
+
+  /* Reduced motion is handled globally below — keep it accessible. */
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  @apply bg-gray-50 text-gray-900 font-sans antialiased;
-  overflow-x: clip;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: "Luxury Garamond", Georgia, "Times New Roman", serif;
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  line-height: 1.0;
-}
-
-::selection {
-  background-color: #d5cab8;
-}
-
-:focus-visible {
-  outline: 2px solid #262321;
-  outline-offset: 2px;
-}
+/* ==========================================================================
+   Components
+   ========================================================================== */
 
 @layer components {
-  .input {
-    @apply w-full rounded-none border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 transition-colors duration-150 focus:border-brand-600 focus:outline-none focus-visible:outline-none focus:ring-4 focus:ring-brand-600/20;
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-padding {
+    @apply py-14 md:py-20 lg:py-24;
+  }
+
+  .section-padding-small {
+    @apply py-10 md:py-14;
   }
 
   .card {
-    @apply rounded-none border border-gray-200 bg-white shadow-sm transition-shadow duration-150;
+    @apply rounded-2xl border border-border bg-white shadow-sm;
+  }
+
+  .input,
+  .input-field {
+    @apply w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors duration-150 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/15;
   }
 
   .spinner {
-    @apply size-10 animate-spin rounded-full border-4 border-brand-100 border-t-brand-600;
+    @apply inline-block size-10 animate-spin rounded-full border-4 border-brand-100 border-t-brand-600;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-bold text-white transition-colors duration-150 hover:bg-indigo-700 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-6 py-2.5 text-sm font-bold text-gray-700 transition-colors duration-150 hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900;
+  }
+
+  .nav-link {
+    @apply text-sm font-semibold text-gray-600 transition-colors duration-150 hover:text-indigo-600;
+  }
+}
+
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+
+@layer utilities {
+  .bg-grid-light {
+    background-image:
+      linear-gradient(to right, rgb(15 23 42 / 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(15 23 42 / 0.05) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  .bg-grid-dark {
+    background-image:
+      linear-gradient(to right, rgb(255 255 255 / 0.07) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(255 255 255 / 0.07) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  .fade-up {
+    animation: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .text-muted {
+    @apply text-gray-500;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================================
+   Accessibility
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
   }
 }

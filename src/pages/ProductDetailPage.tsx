@@ -23,7 +23,7 @@ import {
 } from '../data/products'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../useAuth'
-import { useRazorpayCheckout } from '../useRazorpay'
+import { useYoupiCheckout } from '../useYoupi'
 import { Button } from '../components/Button'
 import { Badge } from '../components/Badge'
 import { ProductCard } from '../components/ProductCard'
@@ -97,7 +97,7 @@ export function ProductDetailPage() {
   const [related, setRelated] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
-  const { status, message, startCheckout } = useRazorpayCheckout()
+  const { status, message, startCheckout } = useYoupiCheckout()
   const checkoutLoading = status === 'loading'
   const { user, loading: authLoading } = useAuth()
   const [owned, setOwned] = useState(false)

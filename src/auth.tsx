@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { ReactNode, Session, User } from '@supabase/supabase-js'
+import type { ReactNode } from 'react'
+import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from './supabaseClient'
 import { AuthContext, type AuthContextValue } from './auth-context'
 
@@ -33,8 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!active) return
         setSession(session ?? null)
         setUser(session?.user ?? null)
-        // Only stop loading after we've received a state change
-        if (loading) setLoading(false)
+        setLoading(false)
       },
     )
 
@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       active = false
       authData.subscription.unsubscribe()
     }
-  }, [loading])
+  }, [])
 
   const signIn = useCallback(
     async (email: string, password: string) => {

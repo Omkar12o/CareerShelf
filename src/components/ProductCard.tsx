@@ -9,7 +9,7 @@ import { ProductIconBadge } from './ProductIcon'
 import { Badge } from './Badge'
 import { Rating } from './Rating'
 import { Button } from './Button'
-import { useRazorpayCheckout } from '../useRazorpay'
+import { useYoupiCheckout } from '../useYoupi'
 
 type ProductCardProps = {
   product: Product
@@ -22,7 +22,7 @@ const badgeColor: Record<string, 'emerald' | 'brand' | 'amber' | 'gray'> = {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const { status, message, startCheckout } = useRazorpayCheckout()
+  const { status, message, startCheckout } = useYoupiCheckout()
   const loading = status === 'loading'
 
   const messageTone =

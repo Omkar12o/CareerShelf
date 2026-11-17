@@ -17,7 +17,7 @@ interface BuyIntent {
 }
 
 // Security: validate that a redirect path is internal and safe
-function isSafeRedirect(path: string | null): boolean {
+function isSafeRedirect(path: string | null): path is string {
   if (!path || !path.startsWith('/')) return false
   // Reject protocol-relative URLs (//) and absolute URLs
   if (path.startsWith('//')) return false
@@ -62,24 +62,9 @@ export function AuthPage() {
   const [resetEmail, setResetEmail] = useState('')
   const [resetSubmitting, setResetSubmitting] = useState(false)
 
-  // While auth state is still loading, show neutral state — never redirect
-  if (authLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="size-6 animate-spin" />
-      </div>
-    )
-  }
-
-  // If already logged in, redirect away from /auth
-  if (user) {
-    const redirect = searchParams.get('redirect')
-    const target = isSafeRedirect(redirect) ? redirect : '/dashboard'
-    navigate(target, { replace: true })
-    return null
-  }
-
-  // Resolve where to send the user after successful auth
+  // Resolve where to send the user after successful auth.
+  // NOTE: every hook in this component must run on every render, so the
+  // loading/user early returns live AFTER all useCallback/useEffect calls.
   const redirectParam = searchParams.get('redirect')
   const storedIntent = getStoredIntent()
   const defaultRedirect = storedIntent?.returnTo ?? '/'
@@ -236,6 +221,31 @@ export function AuthPage() {
     } finally {
       setResetSubmitting(false)
     }
+  }
+
+  // Signed-in users never stay on /auth. Redirecting is a side effect, so it
+  // belongs in an effect rather than in the render body.
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate(resolvedRedirect, { replace: true })
+    }
+  }, [authLoading, user, resolvedRedirect, navigate])
+
+  // While auth state is still loading, show neutral state — never redirect
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="size-6 animate-spin" />
+      </div>
+    )
+  }
+
+  if (user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="size-6 animate-spin" />
+      </div>
+    )
   }
 
   const inputClass =

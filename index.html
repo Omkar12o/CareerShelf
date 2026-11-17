@@ -15,8 +15,11 @@
       rel="stylesheet"
     />
     <title>CareerShelf — Digital products for job seekers</title>
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script src="https://pay.mydomain.com/youpi.js" data-youpi-key="%VITE_YOUPI_PUBLIC_KEY%" data-currency="INR"></script>
+    <!--
+      Youpi checkout SDK is loaded dynamically by src/useYoupi.ts from
+      VITE_YOUPI_GATEWAY_URL so the gateway URL/merchant id stay configurable.
+      The old static Razorpay + placeholder youpi.js tags were removed.
+    -->
   </head>
   <body>
     <div id="root"></div>

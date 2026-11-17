@@ -1,6 +1,5 @@
-import { createContext, useCallback } from 'react'
+import { createContext } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
-import { supabase } from './supabaseClient'
 
 export type AuthContextValue = {
   user: User | null

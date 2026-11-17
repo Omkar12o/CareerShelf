@@ -139,9 +139,9 @@ export function TermsPage() {
             <>
               <p>
                 All prices are listed in Indian Rupees (INR). Payment is
-                collected upfront through Razorpay, our payment gateway
-                provider. By completing a purchase, you authorise the charge to
-                your chosen payment method.
+                collected upfront over UPI through our self-hosted Youpi
+                payment gateway. By completing a purchase, you authorise the
+                transfer from your chosen bank account.
               </p>
               <p>
                 We may change prices or adjust product listings at any time.
@@ -187,7 +187,7 @@ export function TermsPage() {
           children: (
             <p>
               The website may link to third-party websites or services (such as
-              Razorpay). We are not responsible for the content, policies, or
+              your UPI app provider). We are not responsible for the content, policies, or
               practices of any third-party service. Your use of such services
               is subject to their own terms and privacy policies.
             </p>

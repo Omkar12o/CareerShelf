@@ -3,6 +3,11 @@ import { AuthProvider } from './auth'
 import { Layout } from './components/Layout'
 import { ScrollToTop } from './components/ScrollToTop'
 import { HomePage } from './pages/HomePage'
+import { ProjectsPage } from './pages/ProjectsPage'
+import { ProjectDetailPage } from './pages/ProjectDetailPage'
+import { InterviewPrepPage } from './pages/InterviewPrepPage'
+import { CareersPage } from './pages/CareersPage'
+import { RequestProjectPage } from './pages/RequestProjectPage'
 import { ServicesPage } from './pages/ServicesPage'
 import { ServiceDetailPage } from './pages/ServiceDetailPage'
 import { ProductsPage } from './pages/ProductsPage'
@@ -23,6 +28,7 @@ import { AdminOverview } from './components/admin/AdminOverview'
 import { AdminProducts } from './components/admin/AdminProducts'
 import { AdminServices } from './components/admin/AdminServices'
 import { AdminOrders } from './components/admin/AdminOrders'
+import { AdminRequests } from './components/admin/AdminRequests'
 
 const router = createBrowserRouter([
   {
@@ -36,6 +42,11 @@ const router = createBrowserRouter([
     ),
     children: [
       { path: '/', element: <HomePage /> },
+      { path: '/projects', element: <ProjectsPage /> },
+      { path: '/projects/:slug', element: <ProjectDetailPage /> },
+      { path: '/interview-prep', element: <InterviewPrepPage /> },
+      { path: '/careers', element: <CareersPage /> },
+      { path: '/request-project', element: <RequestProjectPage /> },
       { path: '/products', element: <ProductsPage /> },
       { path: '/products/:slug', element: <ProductDetailPage /> },
       { path: '/services', element: <ServicesPage /> },
@@ -79,6 +90,7 @@ const router = createBrowserRouter([
       { path: 'products', element: <AdminProducts /> },
       { path: 'services', element: <AdminServices /> },
       { path: 'orders', element: <AdminOrders /> },
+      { path: 'requests', element: <AdminRequests /> },
     ],
   },
 ])

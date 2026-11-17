@@ -4,7 +4,7 @@ import { getProductBySlug, formatPrice } from '../data/products'
 import { RequirementForm } from '../components/RequirementForm'
 import { CheckoutFlow } from '../components/checkout'
 import { useAuth } from '../useAuth'
-import { useRazorpayCheckout } from '../useRazorpay'
+import { useYoupiCheckout } from '../useYoupi'
 import { Button } from '../components/Button'
 
 export function ServiceDetailPage() {
@@ -13,7 +13,7 @@ export function ServiceDetailPage() {
   const product = slug ? getProductBySlug(slug) : undefined
   const [openFaq, setOpenFaq] = useState<number | null>(null)
   const { user, loading: authLoading } = useAuth()
-  const { status, message, startCheckout } = useRazorpayCheckout()
+  const { status, message, startCheckout } = useYoupiCheckout()
   const checkoutLoading = status === 'loading'
 
   const [buyIntent, setBuyIntent] = useState<{
@@ -203,7 +203,6 @@ export function ServiceDetailPage() {
             <CheckoutFlow
               product={product}
               amount={product.price}
-              upiId="9146601241@axl"
               onPaid={(txnId) => {
                 console.log('Payment completed:', txnId)
               }}

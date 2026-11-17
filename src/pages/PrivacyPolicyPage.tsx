@@ -48,9 +48,10 @@ export function PrivacyPolicyPage() {
               </ul>
               <p>
                 We do <span className="font-medium text-gray-700">not</span>{' '}
-                collect or store your debit or credit card numbers. Card
-                payments are processed entirely by our payment partner,
-                Razorpay, under its own terms and privacy policy.
+                collect or store your debit or credit card numbers, UPI PIN, or
+                bank login credentials. Payments are completed inside your own
+                UPI app, and we receive only the confirmation details needed to
+                complete your order.
               </p>
             </>
           ),
@@ -78,12 +79,14 @@ export function PrivacyPolicyPage() {
           title: 'Payment Processing',
           children: (
             <p>
-              Payments on this website are processed by Razorpay Software
-              Private Limited, a payment aggregator authorised by the Reserve
-              Bank of India. When you pay, you are dealing directly with
-              Razorpay, and your card details are handled by them in accordance
-              with applicable PCI DSS requirements. We receive only the payment
-              status and basic order details needed to complete your purchase.
+              Payments on this website are collected over UPI through our
+              self-hosted Youpi payment gateway. When you pay, the transfer is
+              completed directly from your bank account to the payee UPI ID
+              shown at checkout, using your own UPI app (such as Google Pay,
+              PhonePe, Paytm, or BHIM). We never receive or store your UPI PIN,
+              card details, or bank login credentials. We receive only the
+              payment status (including the UPI reference number) and basic
+              order details needed to complete your purchase.
             </p>
           ),
         },
@@ -94,7 +97,7 @@ export function PrivacyPolicyPage() {
               We never sell, rent, or trade your personal information to third
               parties. We share information only with the service providers we
               rely on to operate the store — such as our hosting and database
-              provider (Supabase) and our payment processor (Razorpay) — and
+              provider (Supabase) and our UPI payment gateway (Youpi) — and
               only to the extent necessary to provide our services to you. We
               may also disclose information where required by law, or to
               protect our rights, safety, and the integrity of our services.
