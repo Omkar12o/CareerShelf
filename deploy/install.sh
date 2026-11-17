@@ -22,6 +22,8 @@ COMPOSE=(docker compose -f "$ROOT/deploy/docker-compose.yml" --env-file "$ENV_FI
 say() { printf '\n\033[1;36m▸ %s\033[0m\n' "$1"; }
 die() { printf '\n\033[1;31m✖ %s\033[0m\n' "$1" >&2; exit 1; }
 
+[ "$(id -u)" = "0" ] || die "Run as root so Docker, swap and ports 80/443 can be set up: sudo bash deploy/install.sh"
+
 # ── 1. docker ────────────────────────────────────────────────────────────────
 if ! command -v docker >/dev/null 2>&1; then
   say "Installing Docker"
@@ -29,6 +31,20 @@ if ! command -v docker >/dev/null 2>&1; then
   systemctl enable --now docker || true
 fi
 docker compose version >/dev/null 2>&1 || die "docker compose plugin missing (apt install docker-compose-plugin)"
+
+# ── 1b. swap ─────────────────────────────────────────────────────────────────
+# Free-tier VMs (Oracle E2.1.Micro) have 1 GB RAM; building the gateway image
+# (npm ci + native better-sqlite3) otherwise gets OOM-killed.
+if [ "$(awk '/^\/swapfile/ {print "yes"}' /etc/fstab 2>/dev/null)" != "yes" ] && ! swapon --show | grep -q swapfile; then
+  say "Adding 2 GB swap so the image build fits in 1 GB RAM"
+  if ! fallocate -l 2G /swapfile 2>/dev/null; then
+    dd if=/dev/zero of=/swapfile bs=1M count=2048 status=none
+  fi
+  chmod 600 /swapfile
+  mkswap /swapfile >/dev/null
+  swapon /swapfile
+  echo '/swapfile none swap sw 0 0' >> /etc/fstab
+fi
 
 # ── 2. config ────────────────────────────────────────────────────────────────
 [ -f "$ENV_FILE" ] || die "Missing deploy/.env — run: cp deploy/.env.example deploy/.env and fill it in"
@@ -58,6 +74,12 @@ if [ "$PUBLIC_ORIGIN" != "${PUBLIC_ORIGIN%/}" ]; then
 fi
 export PUBLIC_ORIGIN
 export PAYEE_NAME="${PAYEE_NAME:-${DEFAULT_MERCHANT_NAME:-CareerShelf}}"
+
+# Caddy cannot issue a certificate before DNS points at this machine.
+HOST_ONLY="$(printf '%s' "${PUBLIC_ORIGIN#https://}" | cut -d/ -f1)"
+if ! getent hosts "$HOST_ONLY" >/dev/null 2>&1; then
+  say "WARNING: $HOST_ONLY does not resolve yet — create the DNS record first or HTTPS will fail"
+fi
 
 # ── 3. Youpi gateway checkout (sibling folder expected by docker-compose) ─────
 if [ ! -d "$GATEWAY" ]; then

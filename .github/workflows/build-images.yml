@@ -88,12 +88,12 @@ jobs:
             -e BASE_CHECKOUT_URL=https://careershelf.example.com \
             -e DEFAULT_PAYEE_VPA=test@upi \
             -e COIN_STORE_WEBHOOK_SECRET=test-secret \
-            -e ENCRYPTION_MASTER_KEY=test-master-key \
+            -e ENCRYPTION_MASTER_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef \
             -e OBSERVER_API_TOKEN=test-observer \
             -e ADMIN_API_TOKEN=test-admin \
             -e INTERNAL_SERVICE_TOKEN=test-internal \
-            -e DEVICE_CREDENTIAL_KEY=test-device \
-            -e BLIND_INDEX_KEY=test-blind \
+            -e DEVICE_CREDENTIAL_KEY=0123456789abcdef0123456789abcdef \
+            -e BLIND_INDEX_KEY=fedcba9876543210fedcba9876543210 \
             -p 6100:6100 careershelf-gateway
           for i in $(seq 1 20); do
             code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:6100/api/v1/health || true)
