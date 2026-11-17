@@ -36,6 +36,14 @@ function fileExtension(name: string): string {
   return (name.split('.').pop() ?? '').toLowerCase().replace(/[^a-z0-9]/g, '')
 }
 
+/** Turns the raw Postgres/Storage errors into something actionable. */
+function saveErrorMessage(message: string): string {
+  if (/row-level security|permission denied/i.test(message)) {
+    return 'Supabase blocked the save. Run supabase/fix_admin_permissions.sql once in the Supabase SQL editor, then try again.'
+  }
+  return message
+}
+
 type ProductForm = {
   title: string
   description: string
@@ -64,7 +72,7 @@ async function uploadPdf(file: File): Promise<string> {
   if (error) {
     throw new Error(
       /bucket|row-level|not found|denied/i.test(error.message)
-        ? 'PDF uploads are not set up yet. Create the "product-files" public storage bucket and its policies in Supabase, then try again.'
+        ? 'File upload failed: the "product-files" bucket is not set up. Run supabase/fix_admin_permissions.sql once in Supabase, then retry (the price itself can still be saved without a file).'
         : error.message,
     )
   }
@@ -191,15 +199,11 @@ export function AdminProducts({
   const validate = (): string | null => {
     if (!form.title.trim()) return 'Please enter a product title.'
     if (!form.category) return 'Please select a category.'
-    if (
-      form.price === '' ||
+    if (form.price === '' ||
       Number.isNaN(Number(form.price)) ||
       Number(form.price) < 0
     ) {
       return 'Please enter a valid price.'
-    }
-    if (modal.mode === 'add' && !pdfFile) {
-      return 'Please upload a PDF or ZIP file for this item.'
     }
     return null
   }
@@ -234,16 +238,15 @@ export function AdminProducts({
           .from('products')
           .update(payload)
           .eq('id', modal.product.id)
-        if (updateError) throw new Error(updateError.message)
+        if (updateError) throw new Error(saveErrorMessage(updateError.message))
         toast('success', 'Product updated.')
       } else {
-        if (!pdfFile) throw new Error('Please upload a PDF or ZIP file for this item.')
-        const pdfUrl = await uploadPdf(pdfFile)
+        const pdfUrl = pdfFile ? await uploadPdf(pdfFile) : null
         const { error: insertError } = await supabase.from('products').insert({
           ...base,
-          'pdf-url': pdfUrl,
+          ...(pdfUrl ? { 'pdf-url': pdfUrl } : {}),
         })
-        if (insertError) throw new Error(insertError.message)
+        if (insertError) throw new Error(saveErrorMessage(insertError.message))
         toast('success', 'Product added.')
       }
 
@@ -514,7 +517,7 @@ export function AdminProducts({
 
           <div>
             <label className="mb-1.5 block text-sm font-medium text-gray-700">
-              Product file (PDF or ZIP)
+              Product file (PDF or ZIP) &mdash; optional
             </label>
             {currentPdfUrl ? (
               <div className="mb-2 flex items-center gap-2 rounded-xl bg-gray-50 px-4 py-2.5 text-sm">
@@ -566,8 +569,7 @@ export function AdminProducts({
             </div>
             {isAdd ? (
               <p className="mt-2 text-xs text-gray-400">
-                Uploaded to the &quot;product-files&quot; storage bucket and
-                saved as the product&apos;s download URL automatically.
+                You can set the price now and upload the file later from Edit.
               </p>
             ) : null}
           </div>

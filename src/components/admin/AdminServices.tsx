@@ -10,8 +10,8 @@ export function AdminServices() {
     <AdminProducts
       lockedCategory="service"
       heading="Projects & Services"
-      subheading="Upload the project file (PDF or ZIP), set your own price, and it appears in the store immediately."
-      emptyHint="Add your first project or service with its file and price."
+      subheading="Set your own price for a project or service. The file (PDF or ZIP) is optional — add it later from Edit."
+      emptyHint="Click Add project or service, type a title and your price. A file is optional."
     />
   )
 }
