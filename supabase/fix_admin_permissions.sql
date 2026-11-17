@@ -35,18 +35,18 @@ create policy "careershelf files read"
 drop policy if exists "careershelf files insert" on storage.objects;
 create policy "careershelf files insert"
   on storage.objects for insert to authenticated
-  with check (bucket_id = 'product-files');
+  with check (bucket_id = 'product-files' and public.is_careershelf_admin());
 
 drop policy if exists "careershelf files update" on storage.objects;
 create policy "careershelf files update"
   on storage.objects for update to authenticated
-  using (bucket_id = 'product-files')
-  with check (bucket_id = 'product-files');
+  using (bucket_id = 'product-files' and public.is_careershelf_admin())
+  with check (bucket_id = 'product-files' and public.is_careershelf_admin());
 
 drop policy if exists "careershelf files delete" on storage.objects;
 create policy "careershelf files delete"
   on storage.objects for delete to authenticated
-  using (bucket_id = 'product-files');
+  using (bucket_id = 'product-files' and public.is_careershelf_admin());
 
 -- 4. Product rules: the storefront keeps reading, only the owner may write ----
 drop policy if exists "careershelf admin insert products" on public.products;
