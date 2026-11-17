@@ -39,6 +39,10 @@ jobs:
           cp deploy/Dockerfile.gateway youpi-pg/Dockerfile.careershelf
           printf 'node_modules\ndata\n.git\n.env\n.env.*\ncoverage\n' > youpi-pg/.dockerignore
 
+      # GHCR image names must be lowercase, but the repository is Omkar12o/CareerShelf.
+      - name: Compute lowercase image namespace
+        run: echo "IMAGE_NS=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
+
       - uses: docker/setup-buildx-action@v3
 
       - uses: docker/login-action@v3
@@ -53,7 +57,7 @@ jobs:
           context: ${{ matrix.context }}
           file: ${{ matrix.dockerfile }}
           push: true
-          tags: ghcr.io/${{ github.repository }}/${{ matrix.name }}:latest
+          tags: ghcr.io/${{ env.IMAGE_NS }}/${{ matrix.name }}:latest
           build-args: |
             PUBLIC_ORIGIN=https://careershelf.example.com
             VITE_SUPABASE_URL=https://example.supabase.co
