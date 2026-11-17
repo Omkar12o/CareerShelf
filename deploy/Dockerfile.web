@@ -1,0 +1,27 @@
+# Builds the React storefront and serves it through Caddy with automatic HTTPS.
+#
+# Stage 1 — build the SPA against the public origin (no localhost baked in).
+FROM node:24-bookworm-slim AS build
+WORKDIR /src
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
+COPY . .
+
+ARG PUBLIC_ORIGIN
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_ANON_KEY
+ARG VITE_YOUPI_MERCHANT_ID
+# scripts/tsc is skipped on purpose: `vite build` is the artifact that ships.
+RUN VITE_API_BASE_URL="$PUBLIC_ORIGIN" \
+    VITE_YOUPI_GATEWAY_URL="$PUBLIC_ORIGIN" \
+    VITE_YOUPI_API_URL="$PUBLIC_ORIGIN" \
+    VITE_SUPABASE_URL="$VITE_SUPABASE_URL" \
+    VITE_SUPABASE_ANON_KEY="$VITE_SUPABASE_ANON_KEY" \
+    VITE_YOUPI_MERCHANT_ID="$VITE_YOUPI_MERCHANT_ID" \
+    npx vite build --outDir /out --emptyOutDir --base /
+
+# Stage 2 — static server + reverse proxy, TLS handled by Caddy automatically.
+FROM caddy:2-alpine
+COPY deploy/Caddyfile /etc/caddy/Caddyfile
+COPY --from=build /out /srv
+EXPOSE 80 443

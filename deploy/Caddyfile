@@ -1,0 +1,60 @@
+# Serves the storefront and reverse-proxies the payment stack behind one origin.
+#
+# Every path below matches what the tunnel server (serve-dist.mjs) does locally,
+# so the app behaves identically on the cloud host.
+
+{$PUBLIC_ORIGIN} {
+	encode zstd gzip
+
+	# ---------- Youpi payment API (must come before /api/*) ----------
+	handle /api/v1/* {
+		reverse_proxy payment-api:6100
+	}
+
+	# ---------- Youpi checkout portal: iframe page + its assets ----------
+	handle /checkout/* {
+		reverse_proxy checkout-portal:7000
+	}
+	handle /youpi.js {
+		reverse_proxy checkout-portal:7000
+	}
+	handle /css/* {
+		reverse_proxy checkout-portal:7000
+	}
+	handle /js/* {
+		reverse_proxy checkout-portal:7000
+	}
+	handle /icons/* {
+		reverse_proxy checkout-portal:7000
+	}
+	handle /images/* {
+		reverse_proxy checkout-portal:7000
+	}
+	handle /fonts/* {
+		reverse_proxy checkout-portal:7000
+	}
+
+	# ---------- CareerShelf store API ----------
+	handle /api/* {
+		reverse_proxy store:3001
+	}
+
+	# ---------- SPA (client-side routes fall back to index.html) ----------
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

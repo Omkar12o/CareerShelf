@@ -597,6 +597,7 @@ const VALID_CATEGORIES: readonly ProductCategory[] = [
   'resume',
   'cheatsheet',
   'referral',
+  'service',
 ]
 
 const CATEGORY_ALIASES: Record<string, ProductCategory> = {
@@ -659,6 +660,15 @@ const CATEGORY_ALIASES: Record<string, ProductCategory> = {
   'reference / referrals': 'referral',
   'reference-referrals': 'referral',
   'referral connection': 'referral',
+  service: 'service',
+  services: 'service',
+  project: 'service',
+  projects: 'service',
+  'projects-services': 'service',
+  'projects & services': 'service',
+  'projects and services': 'service',
+  'software project': 'service',
+  'software projects': 'service',
 }
 
 export function parseCategories(

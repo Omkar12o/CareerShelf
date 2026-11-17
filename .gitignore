@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# deployment secrets / artifacts
+deploy/.env
+deploy/seed/
+
+dist-pages
+

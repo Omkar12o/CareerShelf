@@ -30,7 +30,13 @@ import { AdminServices } from './components/admin/AdminServices'
 import { AdminOrders } from './components/admin/AdminOrders'
 import { AdminRequests } from './components/admin/AdminRequests'
 
-const router = createBrowserRouter([
+// The app must work at a domain root (localhost, any host) and under a
+// sub-path (GitHub Pages project site lives at /CareerShelf/). Vite sets
+// BASE_URL to '/' normally and to '/CareerShelf/' for that build.
+const BASENAME = import.meta.env.BASE_URL.replace(/\/+$/, '')
+
+const router = createBrowserRouter(
+  [
   {
     element: (
       <AuthProvider>
@@ -93,7 +99,9 @@ const router = createBrowserRouter([
       { path: 'requests', element: <AdminRequests /> },
     ],
   },
-])
+  ],
+  { basename: BASENAME },
+)
 
 export default function App() {
   return <RouterProvider router={router} />

@@ -1,0 +1,16 @@
+# Keep the storefront build context small and secret-free.
+node_modules
+dist
+dist-*
+pages-dist
+.git
+.gitignore
+*.log
+.env
+.env.*
+!.env.example
+deploy/.env
+deploy/seed
+deploy/README.md
+supabase
+src/**/*.png

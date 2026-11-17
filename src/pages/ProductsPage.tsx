@@ -25,6 +25,7 @@ const categories: Array<{ key: ProductCategory | 'all'; label: string }> = [
   { key: 'consultancy', label: CATEGORY_LABELS.consultancy },
   { key: 'resume', label: CATEGORY_LABELS.resume },
   { key: 'referral', label: CATEGORY_LABELS.referral },
+  { key: 'service', label: CATEGORY_LABELS.service },
 ]
 
 const categoryDescription: Record<string, string> = {
@@ -42,6 +43,8 @@ const categoryDescription: Record<string, string> = {
     'Downloadable resume templates and guides that pass ATS scans and impress hiring managers.',
   referral:
     'Paid referral connections and warm introductions to hiring managers and product leaders.',
+  service:
+    'Software projects and services delivered with source, documentation, and setup support.',
 }
 
 export function ProductsPage() {

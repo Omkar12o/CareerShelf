@@ -11,7 +11,13 @@ import {
   Upload,
 } from 'lucide-react'
 import { supabase } from '../../supabaseClient'
-import { formatPrice, type ProductRow } from '../../data/products'
+import {
+  formatPrice,
+  parseCategories,
+  CATEGORY_LABELS,
+  type ProductCategory,
+  type ProductRow,
+} from '../../data/products'
 import { Button } from '../Button'
 import { Modal } from './Modal'
 import { useToast } from './toast-context'
@@ -24,6 +30,11 @@ import {
 } from './utils'
 
 const MAX_PDF_MB = 25
+const ALLOWED_FILE_EXTENSIONS = ['pdf', 'zip'] as const
+
+function fileExtension(name: string): string {
+  return (name.split('.').pop() ?? '').toLowerCase().replace(/[^a-z0-9]/g, '')
+}
 
 type ProductForm = {
   title: string
@@ -31,7 +42,6 @@ type ProductForm = {
   price: string
   category: string
 }
-
 const EMPTY_FORM: ProductForm = {
   title: '',
   description: '',
@@ -45,9 +55,7 @@ type ModalState =
   | { mode: 'edit'; product: ProductRow }
 
 async function uploadPdf(file: File): Promise<string> {
-  const ext =
-    (file.name.split('.').pop() ?? 'pdf').toLowerCase().replace(/[^a-z0-9]/g, '') ||
-    'pdf'
+  const ext = fileExtension(file.name) || 'pdf'
   const filePath = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${ext}`
   const { error } = await supabase.storage
     .from(PRODUCT_FILES_BUCKET)
@@ -67,7 +75,20 @@ async function uploadPdf(file: File): Promise<string> {
   return data.publicUrl
 }
 
-export function AdminProducts() {
+type AdminProductsProps = {
+  /** When set, the section is scoped to one category (e.g. Services). */
+  lockedCategory?: ProductCategory
+  heading?: string
+  subheading?: string
+  emptyHint?: string
+}
+
+export function AdminProducts({
+  lockedCategory,
+  heading = 'Products',
+  subheading = 'Add, edit, and remove store products. Files upload automatically.',
+  emptyHint = 'Add your first product to get started.',
+}: AdminProductsProps = {}) {
   const { toast } = useToast()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -113,7 +134,10 @@ export function AdminProducts() {
   }, [reloadKey])
 
   const openAdd = () => {
-    setForm(EMPTY_FORM)
+    setForm({
+      ...EMPTY_FORM,
+      category: lockedCategory ? categoryOptionValue(lockedCategory) : '',
+    })
     setPdfFile(null)
     setFormError(null)
     setModal({ mode: 'add' })
@@ -148,12 +172,16 @@ export function AdminProducts() {
     const file = event.target.files?.[0]
     event.target.value = ''
     if (!file) return
-    if (file.type !== 'application/pdf') {
-      setFormError('Please choose a PDF file.')
+    if (
+      !(ALLOWED_FILE_EXTENSIONS as readonly string[]).includes(
+        fileExtension(file.name),
+      )
+    ) {
+      setFormError('Please choose a PDF or ZIP file.')
       return
     }
     if (file.size > MAX_PDF_MB * 1024 * 1024) {
-      setFormError(`PDF must be ${MAX_PDF_MB}MB or smaller.`)
+      setFormError(`File must be ${MAX_PDF_MB}MB or smaller.`)
       return
     }
     setPdfFile(file)
@@ -171,7 +199,7 @@ export function AdminProducts() {
       return 'Please enter a valid price.'
     }
     if (modal.mode === 'add' && !pdfFile) {
-      return 'Please upload a PDF file for the product.'
+      return 'Please upload a PDF or ZIP file for this item.'
     }
     return null
   }
@@ -209,7 +237,7 @@ export function AdminProducts() {
         if (updateError) throw new Error(updateError.message)
         toast('success', 'Product updated.')
       } else {
-        if (!pdfFile) throw new Error('Please upload a PDF file for the product.')
+        if (!pdfFile) throw new Error('Please upload a PDF or ZIP file for this item.')
         const pdfUrl = await uploadPdf(pdfFile)
         const { error: insertError } = await supabase.from('products').insert({
           ...base,
@@ -275,21 +303,22 @@ export function AdminProducts() {
   const editingProduct = modal.mode === 'edit' ? modal.product : null
   const isAdd = modal.mode === 'add'
   const currentPdfUrl = editingProduct?.['pdf-url']
+  const visibleProducts = lockedCategory
+    ? products.filter((p) => parseCategories(p.categories)[0] === lockedCategory)
+    : products
 
   return (
     <div>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-gray-900">
-            Products
+            {heading}
           </h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Add, edit, and remove store products. PDFs upload automatically.
-          </p>
+          <p className="mt-1 text-sm text-gray-500">{subheading}</p>
         </div>
         <Button onClick={openAdd}>
           <Plus className="size-4" />
-          Add New Product
+          {lockedCategory ? `Add ${heading.replace(/s$/, '')}` : 'Add New Product'}
         </Button>
       </div>
 
@@ -315,17 +344,15 @@ export function AdminProducts() {
               Try again
             </Button>
           </div>
-        ) : products.length === 0 ? (
+        ) : visibleProducts.length === 0 ? (
           <div className="px-6 py-16 text-center">
             <p className="text-sm font-semibold text-gray-900">
-              No products yet
+              No {heading.toLowerCase()} yet
             </p>
-            <p className="mt-1 text-sm text-gray-500">
-              Add your first product to get started.
-            </p>
+            <p className="mt-1 text-sm text-gray-500">{emptyHint}</p>
             <Button onClick={openAdd} className="mt-6">
               <Plus className="size-4" />
-              Add New Product
+              Add {lockedCategory ? heading.replace(/s$/, '') : 'New Product'}
             </Button>
           </div>
         ) : (
@@ -343,7 +370,7 @@ export function AdminProducts() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {products.map((product) => (
+                {visibleProducts.map((product) => (
                   <tr
                     key={String(product.id)}
                     className="transition-colors hover:bg-gray-50"
@@ -459,27 +486,33 @@ export function AdminProducts() {
               >
                 Category
               </label>
-              <select
-                id="admin-product-category"
-                className="input"
-                value={form.category}
-                onChange={updateForm('category')}
-              >
-                <option value="" disabled>
-                  Select a category
-                </option>
-                {ADMIN_CATEGORY_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
+              {lockedCategory ? (
+                <div className="input flex items-center bg-gray-50 text-gray-600">
+                  {CATEGORY_LABELS[lockedCategory]}
+                </div>
+              ) : (
+                <select
+                  id="admin-product-category"
+                  className="input"
+                  value={form.category}
+                  onChange={updateForm('category')}
+                >
+                  <option value="" disabled>
+                    Select a category
                   </option>
-                ))}
-              </select>
+                  {ADMIN_CATEGORY_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {categoryOptionLabel(option)}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
           </div>
 
           <div>
             <label className="mb-1.5 block text-sm font-medium text-gray-700">
-              PDF file
+              Product file (PDF or ZIP)
             </label>
             {currentPdfUrl ? (
               <div className="mb-2 flex items-center gap-2 rounded-xl bg-gray-50 px-4 py-2.5 text-sm">
@@ -501,7 +534,7 @@ export function AdminProducts() {
             <input
               ref={fileInputRef}
               type="file"
-              accept="application/pdf,.pdf"
+              accept="application/pdf,.pdf,application/zip,.zip"
               className="hidden"
               onChange={(event) => handleFileChange(event)}
             />
@@ -518,10 +551,10 @@ export function AdminProducts() {
                   <Upload className="size-4" />
                 )}
                 {pdfFile
-                  ? 'Replace PDF'
+                  ? 'Replace file'
                   : currentPdfUrl
-                    ? 'Upload new PDF'
-                    : 'Choose PDF'}
+                    ? 'Upload new file'
+                    : 'Choose file'}
               </Button>
               {pdfFile ? (
                 <span className="min-w-0 truncate text-sm text-gray-500">

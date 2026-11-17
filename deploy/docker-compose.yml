@@ -1,0 +1,150 @@
+# CareerShelf — 24/7 cloud deployment (PC can stay OFF)
+#
+# One public HTTPS origin serves everything:
+#   /            -> the React storefront (static)
+#   /api/*       -> CareerShelf store API  (orders, catalog, webhook receiver)
+#   /api/v1/*    -> Youpi payment API      (payment sessions, observer heartbeat)
+#   /checkout/*  -> Youpi checkout portal  (UPI QR widget, youpi.js, css, js, icons)
+#
+# Data that must survive restarts lives in named volumes (never in the container).
+
+name: careershelf
+
+services:
+  # ---------------------------------------------------------------- storefront
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.web
+      args:
+        PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:?set PUBLIC_ORIGIN in deploy/.env}
+        VITE_SUPABASE_URL: ${SUPABASE_URL:?}
+        VITE_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:?}
+        VITE_YOUPI_MERCHANT_ID: ${YOUPI_MERCHANT_ID:?}
+    restart: unless-stopped
+    environment:
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - store
+      - payment-api
+      - checkout-portal
+
+  # ------------------------------------------------------- CareerShelf backend
+  store:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.store
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      SERVER_PORT: "3001"
+      SUPABASE_URL: ${SUPABASE_URL:?}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:?}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:?}
+      YOUPI_API_URL: http://payment-api:6100
+      YOUPI_PORTAL_URL: ${PUBLIC_ORIGIN}
+      YOUPI_MERCHANT_ID: ${YOUPI_MERCHANT_ID:?}
+      YOUPI_MERCHANT_KEY: ${YOUPI_MERCHANT_KEY:?}
+      YOUPI_WEBHOOK_SECRET: ${YOUPI_WEBHOOK_SECRET:?}
+      # The permanent GitHub Pages origin calls this API cross-origin.
+      ALLOWED_ORIGINS: ${PUBLIC_ORIGIN},${PAGES_ORIGIN:-https://omkar12o.github.io}
+      CHECKOUT_PUBLIC_URL: ${PUBLIC_ORIGIN}
+      BASE_CHECKOUT_URL: ${PUBLIC_ORIGIN}
+    depends_on:
+      - payment-api
+
+  # --------------------------------------------------------- Youpi payment API
+  payment-api:
+    build:
+      context: ../youpi-pg
+      dockerfile: ../CareerShelf/deploy/Dockerfile.gateway
+    restart: unless-stopped
+    command: ["node", "apps/payment-api/src/index.js"]
+    environment:
+      NODE_ENV: production
+      # Containers must listen on all interfaces or Caddy cannot reach them.
+      YOUPI_BIND_HOST: 0.0.0.0
+      PAYMENT_API_PORT: "6100"
+      USE_SQLITE_FALLBACK: "true"
+      SQLITE_DB_PATH: /app/data/youpi_pg.sqlite
+      YOUPI_ALLOWED_ORIGINS: ${PUBLIC_ORIGIN},${PAGES_ORIGIN:-https://omkar12o.github.io}
+      YOUPI_ALLOWED_RETURN_ORIGINS: ${PUBLIC_ORIGIN},${PAGES_ORIGIN:-https://omkar12o.github.io}
+      CHECKOUT_FRAME_ANCESTORS: ${PUBLIC_ORIGIN} ${PAGES_ORIGIN:-https://omkar12o.github.io}
+      BASE_PAYMENT_API_URL: ${PUBLIC_ORIGIN}
+      BASE_CHECKOUT_URL: ${PUBLIC_ORIGIN}
+      BASE_DEMO_STORE_URL: ${PUBLIC_ORIGIN}
+      BASE_ADMIN_URL: ${PUBLIC_ORIGIN}
+      BASE_HELP_URL: ${PUBLIC_ORIGIN}
+      CHECKOUT_PUBLIC_URL: ${PUBLIC_ORIGIN}
+      # First boot: the migration seeds the merchant with these two values,
+      # then deploy/bootstrap.mjs converges the rest (API key, real VPA).
+      COIN_STORE_WEBHOOK_URL: ${PUBLIC_ORIGIN}/api/payments/webhook
+      COIN_STORE_WEBHOOK_SECRET: ${YOUPI_WEBHOOK_SECRET:?}
+      DEFAULT_MERCHANT_NAME: ${DEFAULT_MERCHANT_NAME:-CareerShelf}
+      DEFAULT_MERCHANT_SLUG: ${DEFAULT_MERCHANT_SLUG:-careershelf}
+      DEFAULT_PAYEE_VPA: ${DEFAULT_PAYEE_VPA:?}
+      PAYEE_NAME: ${PAYEE_NAME:-}
+      DEFAULT_APP_NAME: ${DEFAULT_APP_NAME:-CareerShelf}
+      DEFAULT_SUPPORT_EMAIL: ${DEFAULT_SUPPORT_EMAIL:-}
+      DEFAULT_SUPPORT_PHONE: ${DEFAULT_SUPPORT_PHONE:-}
+      PHONEPE_REGISTERED_MOBILE: ${PHONEPE_REGISTERED_MOBILE:-}
+      ANDROID_ENROLLMENT_SECRET: ${ANDROID_ENROLLMENT_SECRET:?}
+      YOUPI_EXPOSE_DEV_OTP: "false"
+      # Wallets/UPI IDs typed here are real identities: keep keys server-side only.
+      ENCRYPTION_MASTER_KEY: ${ENCRYPTION_MASTER_KEY:?}
+      OBSERVER_API_TOKEN: ${OBSERVER_API_TOKEN:?}
+      ADMIN_API_TOKEN: ${ADMIN_API_TOKEN:?}
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:?}
+      DEVICE_CREDENTIAL_KEY: ${DEVICE_CREDENTIAL_KEY:?}
+      BLIND_INDEX_KEY: ${BLIND_INDEX_KEY:?}
+    volumes:
+      - youpi-data:/app/data
+      - ./bootstrap.mjs:/app/bootstrap.mjs:ro
+
+  # ------------------------------------------------------ Youpi checkout portal
+  checkout-portal:
+    build:
+      context: ../youpi-pg
+      dockerfile: ../CareerShelf/deploy/Dockerfile.gateway
+    restart: unless-stopped
+    command: ["node", "apps/checkout-portal/src/index.js"]
+    environment:
+      NODE_ENV: production
+      YOUPI_BIND_HOST: 0.0.0.0
+      CHECKOUT_PORTAL_PORT: "7000"
+      PAYMENT_API_URL: http://payment-api:6100
+      USE_SQLITE_FALLBACK: "true"
+      SQLITE_DB_PATH: /app/data/youpi_pg.sqlite
+      YOUPI_ALLOWED_ORIGINS: ${PUBLIC_ORIGIN},${PAGES_ORIGIN:-https://omkar12o.github.io}
+      YOUPI_ALLOWED_RETURN_ORIGINS: ${PUBLIC_ORIGIN},${PAGES_ORIGIN:-https://omkar12o.github.io}
+      CHECKOUT_FRAME_ANCESTORS: ${PUBLIC_ORIGIN} ${PAGES_ORIGIN:-https://omkar12o.github.io}
+      BASE_PAYMENT_API_URL: ${PUBLIC_ORIGIN}
+      BASE_CHECKOUT_URL: ${PUBLIC_ORIGIN}
+      DEFAULT_PAYEE_VPA: ${DEFAULT_PAYEE_VPA:?}
+      DEFAULT_MERCHANT_NAME: ${DEFAULT_MERCHANT_NAME:-CareerShelf}
+      DEFAULT_MERCHANT_SLUG: ${DEFAULT_MERCHANT_SLUG:-careershelf}
+      DEFAULT_APP_NAME: ${DEFAULT_APP_NAME:-CareerShelf}
+      DEFAULT_PRIMARY_COLOR: ${DEFAULT_PRIMARY_COLOR:-#0f172a}
+      PHONEPE_REGISTERED_MOBILE: ${PHONEPE_REGISTERED_MOBILE:-}
+      ENCRYPTION_MASTER_KEY: ${ENCRYPTION_MASTER_KEY:?}
+      OBSERVER_API_TOKEN: ${OBSERVER_API_TOKEN:?}
+      ADMIN_API_TOKEN: ${ADMIN_API_TOKEN:?}
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:?}
+      DEVICE_CREDENTIAL_KEY: ${DEVICE_CREDENTIAL_KEY:?}
+      BLIND_INDEX_KEY: ${BLIND_INDEX_KEY:?}
+    volumes:
+      - youpi-data:/app/data
+    depends_on:
+      - payment-api
+
+volumes:
+  youpi-data:
+  caddy-data:
+  caddy-config:

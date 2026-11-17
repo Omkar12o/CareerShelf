@@ -1,0 +1,24 @@
+# Youpi gateway monorepo image — used by BOTH payment-api and checkout-portal
+# (docker-compose overrides the command for each service).
+#
+# Build context is the `youpi-pg` checkout; the Dockerfile lives in CareerShelf/deploy.
+FROM node:24-bookworm
+WORKDIR /app
+ENV NODE_ENV=production
+
+# better-sqlite3 compiles a native binding; keep the toolchain available.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends python3 make g++ ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
+COPY package.json package-lock.json ./
+COPY packages ./packages
+COPY apps ./apps
+COPY scripts ./scripts
+
+RUN npm ci --no-audit --no-fund
+
+# Persistent SQLite lives on a mounted volume (see docker-compose.yml).
+RUN mkdir -p /app/data
+EXPOSE 6100 7000
+CMD ["node", "apps/payment-api/src/index.js"]

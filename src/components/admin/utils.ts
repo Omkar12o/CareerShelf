@@ -1,4 +1,4 @@
-import { parseCategories } from '../../data/products'
+import { CATEGORY_LABELS, parseCategories } from '../../data/products'
 
 export const PRODUCT_FILES_BUCKET = 'product-files'
 
@@ -10,6 +10,7 @@ export const ADMIN_CATEGORY_OPTIONS = [
   'consultancy',
   'resume-guides',
   'reference-referrals',
+  'projects-services',
 ] as const
 
 const CATEGORY_OPTION_BY_KEY: Record<string, string> = {
@@ -20,6 +21,7 @@ const CATEGORY_OPTION_BY_KEY: Record<string, string> = {
   consultancy: 'consultancy',
   resume: 'resume-guides',
   referral: 'reference-referrals',
+  service: 'projects-services',
 }
 
 export function categoryOptionValue(
@@ -32,8 +34,8 @@ export function categoryOptionValue(
 export function categoryOptionLabel(
   raw: string | string[] | null | undefined,
 ): string {
-  const value = categoryOptionValue(raw)
-  return value || '—'
+  const canonical = parseCategories(raw)[0]
+  return canonical ? CATEGORY_LABELS[canonical] : '—'
 }
 
 export function formatDate(iso: string): string {
