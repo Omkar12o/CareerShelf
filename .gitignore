@@ -28,4 +28,5 @@ deploy/.env
 deploy/seed/
 
 dist-pages
+pages-dist
 

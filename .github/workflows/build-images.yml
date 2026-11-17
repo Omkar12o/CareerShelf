@@ -6,7 +6,13 @@ on:
   push:
     branches: [main]
     paths:
-      - "deploy/**"
+      # Only changes that actually alter the images.
+      - "deploy/Dockerfile.web"
+      - "deploy/Dockerfile.store"
+      - "deploy/Dockerfile.gateway"
+      - "deploy/docker-compose.yml"
+      - "deploy/Caddyfile"
+      - "deploy/bootstrap.mjs"
       - ".github/workflows/build-images.yml"
   workflow_dispatch:
 

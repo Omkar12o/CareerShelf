@@ -114,17 +114,15 @@ curl -s https://careershelf.duckdns.org/api/v1/health
 ## 6. Keep the permanent link working
 
 The link you shared stays **https://omkar12o.github.io/CareerShelf/**; only the API
-origin baked into it changes. Rebuild and republish once:
+origin baked into it changes. Rebuild and republish once, from the PC:
 
 ```powershell
 cd "C:\Users\OMKAR SUNIL MOHITE\Desktop\carrer\CareerShelf"
-$env:VITE_API_BASE_URL="https://careershelf.duckdns.org"
-$env:VITE_YOUPI_GATEWAY_URL="https://careershelf.duckdns.org"
-$env:VITE_YOUPI_API_URL="https://careershelf.duckdns.org"
-node node_modules/vite/bin/vite.js build --outDir pages-dist --base /CareerShelf/
-Copy-Item pages-dist\index.html pages-dist\404.html -Force
-git -C . subtree push --prefix pages-dist origin gh-pages   # or your existing publish script
+powershell -File deploy/rebuild-pages.ps1 -Origin https://careershelf.duckdns.org
 ```
+
+That script builds with `--base /CareerShelf/`, writes the SPA `404.html`, and force-pushes
+`gh-pages`. It is the only step that still needs a local checkout.
 
 After that the Pages site talks straight to the cloud; nothing on your PC is involved.
 You can also simply share the cloud URL — it is same-origin, so no CORS at all.
@@ -172,5 +170,6 @@ You can also simply share the cloud URL — it is same-origin, so no CORS at all
 | `Dockerfile.store` | CareerShelf API image |
 | `Dockerfile.gateway` | Youpi monorepo image (staged into `youpi-pg/Dockerfile.careershelf` by the installer) |
 | `bootstrap.mjs` | converges merchant key, webhook URL and receiving VPA |
+| `rebuild-pages.ps1` | rebuilds and republishes the permanent GitHub Pages bundle against a new origin |
 | `.env.example` | template — copy to `.env`, never commit the filled file |
 | `install.sh` | Docker install → clone gateway → build → bootstrap → health check |
