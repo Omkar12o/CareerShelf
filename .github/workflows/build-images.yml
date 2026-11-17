@@ -28,7 +28,8 @@ jobs:
             dockerfile: deploy/Dockerfile.store
           - name: gateway
             context: ./youpi-pg
-            dockerfile: Dockerfile.careershelf
+            # `--file` is resolved against the workspace, not the build context.
+            dockerfile: youpi-pg/Dockerfile.careershelf
     steps:
       - uses: actions/checkout@v4
 
