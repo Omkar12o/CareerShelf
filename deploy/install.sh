@@ -49,6 +49,10 @@ fi
 # ── 2. config ────────────────────────────────────────────────────────────────
 [ -f "$ENV_FILE" ] || die "Missing deploy/.env — run: cp deploy/.env.example deploy/.env and fill it in"
 
+# `sudo PUBLIC_ORIGIN=https://name.duckdns.org bash deploy/install.sh` rewrites the
+# domain instead of forcing you to hand-edit deploy/.env on the server.
+ORIGIN_OVERRIDE="${PUBLIC_ORIGIN:-}"
+
 # Generate server-side crypto material once (blank values only).
 gen_secret() {
   if command -v openssl >/dev/null 2>&1; then openssl rand -hex 32; else head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n'; fi
@@ -63,6 +67,15 @@ done
 
 # shellcheck disable=SC1090
 set -a; . "$ENV_FILE"; set +a
+if [ -n "$ORIGIN_OVERRIDE" ]; then
+  PUBLIC_ORIGIN="${ORIGIN_OVERRIDE%/}"
+  if grep -q '^PUBLIC_ORIGIN=' "$ENV_FILE"; then
+    sed -i "s#^PUBLIC_ORIGIN=.*#PUBLIC_ORIGIN=${PUBLIC_ORIGIN}#" "$ENV_FILE"
+  else
+    printf 'PUBLIC_ORIGIN=%s\n' "$PUBLIC_ORIGIN" >> "$ENV_FILE"
+  fi
+  say "PUBLIC_ORIGIN set to $PUBLIC_ORIGIN"
+fi
 for required in PUBLIC_ORIGIN SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE_KEY \
                 YOUPI_MERCHANT_KEY YOUPI_WEBHOOK_SECRET DEFAULT_PAYEE_VPA; do
   [ -n "${!required:-}" ] || die "$required is empty in deploy/.env"

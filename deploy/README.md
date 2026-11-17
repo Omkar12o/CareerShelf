@@ -59,6 +59,19 @@ nano deploy/.env      # fill in the blanks (table below)
 bash deploy/install.sh
 ```
 
+`deploy/.env` must be uploaded, not typed by hand. From Windows (OpenSSH is built in):
+
+```powershell
+cd "C:\Users\OMKAR SUNIL MOHITE\Desktop\carrer\CareerShelf"
+scp deploy/.env ubuntu@<SERVER-IP>:~/CareerShelf/deploy/.env
+```
+
+Then the domain can be passed straight to the installer instead of edited:
+
+```bash
+sudo PUBLIC_ORIGIN=https://careershelf.duckdns.org bash deploy/install.sh
+```
+
 ### `deploy/.env` — what each value is
 
 | Key | Where to get it |
