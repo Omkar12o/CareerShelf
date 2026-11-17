@@ -306,6 +306,8 @@ export function AdminProducts({
   const visibleProducts = lockedCategory
     ? products.filter((p) => parseCategories(p.categories)[0] === lockedCategory)
     : products
+  const addLabel =
+    lockedCategory === 'service' ? 'Add project or service' : 'Add New Product'
 
   return (
     <div>
@@ -318,7 +320,7 @@ export function AdminProducts({
         </div>
         <Button onClick={openAdd}>
           <Plus className="size-4" />
-          {lockedCategory ? `Add ${heading.replace(/s$/, '')}` : 'Add New Product'}
+          {addLabel}
         </Button>
       </div>
 
@@ -352,7 +354,7 @@ export function AdminProducts({
             <p className="mt-1 text-sm text-gray-500">{emptyHint}</p>
             <Button onClick={openAdd} className="mt-6">
               <Plus className="size-4" />
-              Add {lockedCategory ? heading.replace(/s$/, '') : 'New Product'}
+              {addLabel}
             </Button>
           </div>
         ) : (
