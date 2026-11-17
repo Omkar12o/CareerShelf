@@ -64,7 +64,7 @@ services:
   payment-api:
     build:
       context: ../youpi-pg
-      dockerfile: ../CareerShelf/deploy/Dockerfile.gateway
+      dockerfile: Dockerfile.careershelf
     restart: unless-stopped
     command: ["node", "apps/payment-api/src/index.js"]
     environment:
@@ -112,7 +112,7 @@ services:
   checkout-portal:
     build:
       context: ../youpi-pg
-      dockerfile: ../CareerShelf/deploy/Dockerfile.gateway
+      dockerfile: Dockerfile.careershelf
     restart: unless-stopped
     command: ["node", "apps/checkout-portal/src/index.js"]
     environment:

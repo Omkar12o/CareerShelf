@@ -65,6 +65,19 @@ if [ ! -d "$GATEWAY" ]; then
   git clone --depth 1 https://github.com/youpi-pg/YouPI-PG.git "$GATEWAY"
 fi
 
+# The gateway image is built from the gateway checkout, so its Dockerfile has to
+# live inside that build context. Keep the canonical copy in deploy/ and stage it.
+cp "$ROOT/deploy/Dockerfile.gateway" "$GATEWAY/Dockerfile.careershelf"
+cat > "$GATEWAY/.dockerignore" <<'EOF'
+node_modules
+data
+.git
+*.log
+.env
+.env.*
+coverage
+EOF
+
 # ── 4. build + start ─────────────────────────────────────────────────────────
 say "Building images (first run takes 5–10 minutes)"
 cd "$ROOT"

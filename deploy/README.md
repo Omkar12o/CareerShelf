@@ -80,7 +80,9 @@ bash deploy/install.sh
 ## 4. What the installer does
 
 1. Installs Docker + compose plugin if absent.
-2. Clones the Youpi gateway next to `CareerShelf/` (compose expects `../youpi-pg`).
+2. Clones the Youpi gateway next to `CareerShelf/` (compose expects `../youpi-pg`) and stages
+   `deploy/Dockerfile.gateway` as `youpi-pg/Dockerfile.careershelf`, because a Dockerfile must
+   live inside its build context.
 3. Builds three images: storefront+Caddy, store API, gateway (payment-api + portal share one image).
 4. Starts the stack with `restart: unless-stopped` and the `youpi-data` volume, so Docker restarts and VM reboots bring it back on their own.
 5. Runs `deploy/bootstrap.mjs` inside the payment-api container. It converges the merchant row through the gateway’s own repositories:
@@ -168,7 +170,7 @@ You can also simply share the cloud URL — it is same-origin, so no CORS at all
 | `Caddyfile` | single-origin routing + automatic HTTPS |
 | `Dockerfile.web` | builds the SPA, serves it with Caddy |
 | `Dockerfile.store` | CareerShelf API image |
-| `Dockerfile.gateway` | Youpi monorepo image (payment-api + portal) |
+| `Dockerfile.gateway` | Youpi monorepo image (staged into `youpi-pg/Dockerfile.careershelf` by the installer) |
 | `bootstrap.mjs` | converges merchant key, webhook URL and receiving VPA |
 | `.env.example` | template — copy to `.env`, never commit the filled file |
 | `install.sh` | Docker install → clone gateway → build → bootstrap → health check |
